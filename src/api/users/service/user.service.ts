@@ -5,20 +5,20 @@ import { Repository } from 'typeorm';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { UserEntity } from '../../../packages/entities/user/user.entity';
-import { RoleEntity } from '../../../packages/entities/user/role.entity';
-import { UserRoleEntity } from '../../../packages/entities/user/user-role.entity';
-import { ResponseService } from '../../../packages/services/response.service';
-import { ExceptionService } from '../../../packages/services/exception.service';
-import { BcryptService } from '../../../packages/services/bcrypt.service';
-import { RequestService } from '../../../packages/services/request.service';
-import { UserResponseDto } from '../../../packages/dto/response/user-response.dto';
-import { UserDto } from '../../../packages/dto/user/user.dto';
-import { SystemException } from '../../../packages/exceptions/system.exception';
-import { RoleName } from '../../../packages/enum/role-name.enum';
-import { ChangePasswordDto } from '../../../packages/dto/user/change-password.dto';
-import { DeleteDto } from '../../../packages/dto/response/delete.dto';
-import { UserRoleDto } from '../../../packages/dto/user/user-role.dto';
+import { UserEntity } from '../../../package/entities/user/user.entity';
+import { RoleEntity } from '../../../package/entities/user/role.entity';
+import { UserRoleEntity } from '../../../package/entities/user/user-role.entity';
+import { ResponseService } from '../../../package/services/response.service';
+import { ExceptionService } from '../../../package/services/exception.service';
+import { BcryptService } from '../../../package/services/bcrypt.service';
+import { RequestService } from '../../../package/services/request.service';
+import { UserResponseDto } from '../../../package/dto/response/user-response.dto';
+import { UserDto } from '../../../package/dto/user/user.dto';
+import { SystemException } from '../../../package/exceptions/system.exception';
+import { RoleName } from '../../../package/enum/role-name.enum';
+import { ChangePasswordDto } from '../../../package/dto/user/change-password.dto';
+import { DeleteDto } from '../../../package/dto/response/delete.dto';
+import { UserRoleDto } from '../../../package/dto/user/user-role.dto';
 
 @Injectable()
 export class UserService {

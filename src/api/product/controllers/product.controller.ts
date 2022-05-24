@@ -18,13 +18,13 @@ import {
 } from '@nestjs/swagger';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { ProductService } from '../services/product.service';
-import { ResponseService } from '../../../packages/services/response.service';
-import { RequestService } from '../../../packages/services/request.service';
-import { IntValidationPipe } from '../../../packages/pipes/int-validation.pipe';
-import { ResponseDto } from '../../../packages/dto/response/response.dto';
-import { DtoValidationPipe } from '../../../packages/pipes/dto-validation.pipe';
-import { UuidValidationPipe } from '../../../packages/pipes/uuid-validation.pipe';
-import { ProductDto } from '../../../packages/dto/product/product.dto';
+import { ResponseService } from '../../../package/services/response.service';
+import { RequestService } from '../../../package/services/request.service';
+import { IntValidationPipe } from '../../../package/pipes/int-validation.pipe';
+import { ResponseDto } from '../../../package/dto/response/response.dto';
+import { DtoValidationPipe } from '../../../package/pipes/dto-validation.pipe';
+import { UuidValidationPipe } from '../../../package/pipes/uuid-validation.pipe';
+import { ProductDto } from '../../../package/dto/product/product.dto';
 
 @ApiTags('Product')
 @ApiBearerAuth()

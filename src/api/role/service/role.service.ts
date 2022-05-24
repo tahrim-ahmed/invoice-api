@@ -2,17 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToClass } from 'class-transformer';
-import { RoleEntity } from '../../../packages/entities/user/role.entity';
-import { ExceptionService } from '../../../packages/services/exception.service';
-import { RoleDto } from '../../../packages/dto/user/role.dto';
-import { SystemException } from '../../../packages/exceptions/system.exception';
+import { RoleEntity } from '../../../package/entities/user/role.entity';
+import { RoleDto } from '../../../package/dto/user/role.dto';
+import { SystemException } from '../../../package/exceptions/system.exception';
 
 @Injectable()
 export class RoleService {
   constructor(
     @InjectRepository(RoleEntity)
     private roleRepository: Repository<RoleEntity>,
-    private exceptionService: ExceptionService,
   ) {}
 
   /*search = async (

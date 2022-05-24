@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { UserSeederModule } from './user/user-seeder.module';
 import { SeederService } from './seeder.service';
-import { configEnvironment } from '../packages/env-config/env-config';
-import { configTypeorm } from '../packages/typeorm-config/typeorm.config';
+import { configEnvironment } from '../package/env-config/env-config';
+import { configTypeorm } from '../package/typeorm-config/typeorm.config';
 
 @Module({
   imports: [configEnvironment(), configTypeorm(), UserSeederModule],

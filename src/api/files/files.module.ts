@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FilesService } from './service/files.service';
 import { FilesController } from './controller/files.controller';
-import { ResponseService } from '../../packages/services/response.service';
+import { ResponseService } from '../../package/services/response.service';
 
 @Module({
   imports: [],

@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { ValueTransformer } from 'typeorm';
 
 function isNullOrUndefined<T>(
@@ -8,8 +7,6 @@ function isNullOrUndefined<T>(
 }
 
 export class StringToNumericTransformer implements ValueTransformer {
-  private readonly logger = new Logger(StringToNumericTransformer.name);
-
   to(data?: number | null): number | null {
     if (!isNullOrUndefined(data)) {
       return data;

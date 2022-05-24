@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../../../packages/entities/user/user.entity';
-import { RoleEntity } from '../../../packages/entities/user/role.entity';
-import { UserRoleEntity } from '../../../packages/entities/user/user-role.entity';
-import { BcryptService } from '../../../packages/services/bcrypt.service';
-import { usersObject } from '../../../packages/json/users.json';
-import { RoleName } from '../../../packages/enum/role-name.enum';
-import { UserDto } from '../../../packages/dto/user/user.dto';
+import { UserEntity } from '../../../package/entities/user/user.entity';
+import { RoleEntity } from '../../../package/entities/user/role.entity';
+import { UserRoleEntity } from '../../../package/entities/user/user-role.entity';
+import { BcryptService } from '../../../package/services/bcrypt.service';
+import { usersObject } from '../../../package/json/users.json';
+import { RoleName } from '../../../package/enum/role-name.enum';
+import { UserDto } from '../../../package/dto/user/user.dto';
 
 @Injectable()
 export class UserSeeder {

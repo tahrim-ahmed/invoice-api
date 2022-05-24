@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InvoiceEntity } from '../../packages/entities/invoice/invoice.entity';
-import { InvoiceDetailsEntity } from '../../packages/entities/invoice/invoice-details.entity';
-import { ProductEntity } from '../../packages/entities/product/product.entity';
+import { InvoiceEntity } from '../../package/entities/invoice/invoice.entity';
+import { InvoiceDetailsEntity } from '../../package/entities/invoice/invoice-details.entity';
+import { ProductEntity } from '../../package/entities/product/product.entity';
 import { ClientModule } from '../client/client.module';
 import { InvoiceController } from './controllers/invoice.controller';
 import { InvoiceService } from './services/invoice.service';
-import { ResponseService } from '../../packages/services/response.service';
-import { ExceptionService } from '../../packages/services/exception.service';
-import { RequestService } from '../../packages/services/request.service';
-import { PermissionService } from '../../packages/services/permission.service';
+import { ResponseService } from '../../package/services/response.service';
+import { ExceptionService } from '../../package/services/exception.service';
+import { RequestService } from '../../package/services/request.service';
+import { PermissionService } from '../../package/services/permission.service';
 
 @Module({
   imports: [

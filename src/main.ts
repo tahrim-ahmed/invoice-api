@@ -5,10 +5,11 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+
 export let NEST_APP: NestExpressApplication;
 
 async function bootstrap() {
-  const logger = new Logger('Pay-Site-api-bootstrap');
+  const logger = new Logger('distributor-api-bootstrap');
 
   NEST_APP = await NestFactory.create<NestExpressApplication>(AppModule);
   NEST_APP.setGlobalPrefix('api/v1');
@@ -26,7 +27,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(NEST_APP, config);
-  SwaggerModule.setup('pay-site-api', NEST_APP, document);
+  SwaggerModule.setup('distributor-api', NEST_APP, document);
 
   const configService = NEST_APP.get(ConfigService);
   const port = configService.get<number>('PORT');
@@ -35,9 +36,11 @@ async function bootstrap() {
 
   await NEST_APP.listen(port);
 
+  logger.warn('Running in ' + process.env.NODE_ENV + ' mode');
   logger.log(
-    `Documentation is running in http://localhost:${port}/pay-site-api`,
+    `Documentation is running in http://localhost:${port}/distributor-api`,
   );
   logger.log(`Api is running in http://localhost:${port}`);
 }
+
 bootstrap();

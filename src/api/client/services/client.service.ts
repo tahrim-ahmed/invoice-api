@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToClass, plainToInstance } from 'class-transformer';
-import { ExceptionService } from '../../../packages/services/exception.service';
-import { PermissionService } from '../../../packages/services/permission.service';
-import { RequestService } from '../../../packages/services/request.service';
-import { SystemException } from '../../../packages/exceptions/system.exception';
-import { DeleteDto } from '../../../packages/dto/response/delete.dto';
-import { ClientDto } from '../../../packages/dto/client/client.dto';
-import { ClientEntity } from '../../../packages/entities/client/client.entity';
+import { ExceptionService } from '../../../package/services/exception.service';
+import { SystemException } from '../../../package/exceptions/system.exception';
+import { DeleteDto } from '../../../package/dto/response/delete.dto';
+import { ClientDto } from '../../../package/dto/client/client.dto';
+import { ClientEntity } from '../../../package/entities/client/client.entity';
 
 @Injectable()
 export class ClientService {
@@ -16,8 +14,6 @@ export class ClientService {
     @InjectRepository(ClientEntity)
     private readonly clientRepository: Repository<ClientEntity>,
     private readonly exceptionService: ExceptionService,
-    private readonly permissionService: PermissionService,
-    private readonly requestService: RequestService,
   ) {}
 
   search = async (

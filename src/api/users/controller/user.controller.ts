@@ -16,12 +16,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from '../service/user.service';
-import { ResponseService } from '../../../packages/services/response.service';
-import { ResponseDto } from '../../../packages/dto/response/response.dto';
-import { DtoValidationPipe } from '../../../packages/pipes/dto-validation.pipe';
-import { UserDto } from '../../../packages/dto/user/user.dto';
-import { IntValidationPipe } from '../../../packages/pipes/int-validation.pipe';
-import { UuidValidationPipe } from '../../../packages/pipes/uuid-validation.pipe';
+import { ResponseService } from '../../../package/services/response.service';
+import { ResponseDto } from '../../../package/dto/response/response.dto';
+import { DtoValidationPipe } from '../../../package/pipes/dto-validation.pipe';
+import { UserDto } from '../../../package/dto/user/user.dto';
+import { IntValidationPipe } from '../../../package/pipes/int-validation.pipe';
+import { UuidValidationPipe } from '../../../package/pipes/uuid-validation.pipe';
 
 @ApiTags('User')
 @Controller('users')

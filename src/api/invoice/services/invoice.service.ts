@@ -2,18 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-import { InvoiceEntity } from '../../../packages/entities/invoice/invoice.entity';
-import { InvoiceDetailsEntity } from '../../../packages/entities/invoice/invoice-details.entity';
-import { ProductEntity } from '../../../packages/entities/product/product.entity';
-import { ExceptionService } from '../../../packages/services/exception.service';
+import { InvoiceEntity } from '../../../package/entities/invoice/invoice.entity';
+import { InvoiceDetailsEntity } from '../../../package/entities/invoice/invoice-details.entity';
+import { ProductEntity } from '../../../package/entities/product/product.entity';
+import { ExceptionService } from '../../../package/services/exception.service';
 import { ClientService } from '../../client/services/client.service';
-import { PermissionService } from '../../../packages/services/permission.service';
-import { RequestService } from '../../../packages/services/request.service';
-import { InvoiceDto } from '../../../packages/dto/invoice/invoice.dto';
-import { SystemException } from '../../../packages/exceptions/system.exception';
-import { UserEntity } from '../../../packages/entities/user/user.entity';
-import { CreateInvoiceDto } from '../../../packages/dto/create/create-invoice.dto';
-import { InvoiceDetailsDto } from '../../../packages/dto/invoice/invoice-details.dto';
+import { PermissionService } from '../../../package/services/permission.service';
+import { RequestService } from '../../../package/services/request.service';
+import { InvoiceDto } from '../../../package/dto/invoice/invoice.dto';
+import { SystemException } from '../../../package/exceptions/system.exception';
+import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
+import { InvoiceDetailsDto } from '../../../package/dto/invoice/invoice-details.dto';
 
 @Injectable()
 export class InvoiceService {

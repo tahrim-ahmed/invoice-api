@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
-import { BcryptService } from '../../../packages/services/bcrypt.service';
+import { BcryptService } from '../../../package/services/bcrypt.service';
 import { UserService } from '../../users/service/user.service';
-import { LoginDto } from '../../../packages/dto/user/login.dto';
-import { UserResponseDto } from '../../../packages/dto/response/user-response.dto';
-import { UserDto } from '../../../packages/dto/user/user.dto';
-import { SystemException } from '../../../packages/exceptions/system.exception';
-import { UserRoleDto } from '../../../packages/dto/user/user-role.dto';
-import { CustomUserRoleDto } from '../../../packages/dto/user/custom-user-role.dto';
-import { RoleName } from '../../../packages/enum/role-name.enum';
-import { ChangePasswordDto } from '../../../packages/dto/user/change-password.dto';
+import { LoginDto } from '../../../package/dto/user/login.dto';
+import { UserResponseDto } from '../../../package/dto/response/user-response.dto';
+import { UserDto } from '../../../package/dto/user/user.dto';
+import { SystemException } from '../../../package/exceptions/system.exception';
+import { UserRoleDto } from '../../../package/dto/user/user-role.dto';
+import { CustomUserRoleDto } from '../../../package/dto/user/custom-user-role.dto';
+import { RoleName } from '../../../package/enum/role-name.enum';
+import { ChangePasswordDto } from '../../../package/dto/user/change-password.dto';
 import * as fs from 'fs';
 
 @Injectable()

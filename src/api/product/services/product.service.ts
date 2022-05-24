@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToClass, plainToInstance } from 'class-transformer';
-import { ExceptionService } from '../../../packages/services/exception.service';
-import { PermissionService } from '../../../packages/services/permission.service';
-import { RequestService } from '../../../packages/services/request.service';
-import { SystemException } from '../../../packages/exceptions/system.exception';
-import { DeleteDto } from '../../../packages/dto/response/delete.dto';
-import { ProductDto } from '../../../packages/dto/product/product.dto';
-import { ProductEntity } from '../../../packages/entities/product/product.entity';
+import { ExceptionService } from '../../../package/services/exception.service';
+import { SystemException } from '../../../package/exceptions/system.exception';
+import { DeleteDto } from '../../../package/dto/response/delete.dto';
+import { ProductDto } from '../../../package/dto/product/product.dto';
+import { ProductEntity } from '../../../package/entities/product/product.entity';
 
 @Injectable()
 export class ProductService {
@@ -16,8 +14,6 @@ export class ProductService {
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly exceptionService: ExceptionService,
-    private readonly permissionService: PermissionService,
-    private readonly requestService: RequestService,
   ) {}
 
   search = async (
