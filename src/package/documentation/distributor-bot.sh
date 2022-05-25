@@ -41,7 +41,7 @@ function seeder() {
   echo 'Initializing seeder'
   cd $deploy_dir/$api
 
-  yarn run seeder
+  yarn run seeder:prod
   cd
 }
 
