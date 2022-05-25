@@ -16,7 +16,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seeder": "cross-env NODE_ENV=development tsnd dist/seeder/main.js",
     "api:dev": "cross-env NODE_ENV=development tsnd --respawn --transpile-only src/main.ts",
-    "api:prod": "pm2 start -f dist/main.js --name 'distributor-api'",
+    "api:prod": "cross-env NODE_ENV=production pm2 start -f dist/main.js --name 'distributor-api'",
     "api:stop": "pm2 delete distributor-api && pm2 save --force"
   },
   "dependencies": {
