@@ -10,6 +10,7 @@ export let NEST_APP: NestExpressApplication;
 
 async function bootstrap() {
   const logger = new Logger('distributor-api-bootstrap');
+  logger.warn('Running in ' + process.env.NODE_ENV + ' mode');
 
   NEST_APP = await NestFactory.create<NestExpressApplication>(AppModule);
   NEST_APP.setGlobalPrefix('api/v1');
@@ -36,7 +37,6 @@ async function bootstrap() {
 
   await NEST_APP.listen(port);
 
-  logger.warn('Running in ' + process.env.NODE_ENV + ' mode');
   logger.log(
     `Documentation is running in http://localhost:${port}/distributor-api`,
   );
