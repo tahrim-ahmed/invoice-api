@@ -15,7 +15,7 @@ echo "Login in docker hub..........."
 docker login -u $docker_username -p $docker_password
 
 echo 'Pulling from docker hub.......'
-docker run -d --pull always --publish 3901:80 $docker_username/$app_name
+docker run -d --pull always --publish 4901:80 $docker_username/$app_name
 
 echo 'Distributor frontend is running...........'
 
