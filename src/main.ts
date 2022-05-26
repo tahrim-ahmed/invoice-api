@@ -5,6 +5,8 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { SystemExceptionFilter } from './package/filters/system-exception.filter';
+import { FieldExceptionFilter } from './package/filters/field-exception.filter';
 
 export let NEST_APP: NestExpressApplication;
 
@@ -14,6 +16,8 @@ async function bootstrap() {
 
   NEST_APP = await NestFactory.create<NestExpressApplication>(AppModule);
   NEST_APP.setGlobalPrefix('api/v1');
+  NEST_APP.useGlobalFilters(new SystemExceptionFilter());
+  NEST_APP.useGlobalFilters(new FieldExceptionFilter());
 
   NEST_APP.useStaticAssets(join(__dirname, '..', 'public'), {
     index: false,

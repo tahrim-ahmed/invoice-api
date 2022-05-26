@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDateString, IsDecimal, IsInt,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
@@ -14,10 +15,14 @@ import { ClientDto } from '../client/client.dto';
 
 export class InvoiceDto extends BaseDto {
   @ApiProperty()
-  @IsOptional()
-  @IsString({ message: 'InvoiceID must be a string' })
-  @MaxLength(255, { message: 'InvoiceID less than 255 characters' })
-  invoiceID: string;
+  @IsNotEmpty({ message: 'Date can not be empty' })
+  @IsDateString({ strict: true })
+  orderDate: Date | string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Date can not be empty' })
+  @IsDateString({ strict: true })
+  shippingDate: Date | string;
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Platform can not be empty' })
@@ -42,7 +47,7 @@ export class InvoiceDto extends BaseDto {
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Total Commission can not be empty' })
-  @IsNumberString({}, { message: 'Total Amount must be a number' })
+  @IsNumber({}, { message: 'Total Commission must be a number'})
   totalProfit: number;
 
   @ApiProperty()

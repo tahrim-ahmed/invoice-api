@@ -6,8 +6,19 @@ import { ClientEntity } from '../client/client.entity';
 
 @Entity({ name: 'invoices' })
 export class InvoiceEntity extends CustomBaseEntity {
-  @Column({ type: 'varchar', name: 'invoice_id', length: 255, nullable: true })
-  invoiceID: string;
+  @Column({
+    type: 'date',
+    name: 'order_date',
+    nullable: false,
+  })
+  orderDate: Date | string;
+
+  @Column({
+    type: 'date',
+    name: 'shipping_date',
+    nullable: false,
+  })
+  shippingDate: Date | string;
 
   @Column({ type: 'varchar', name: 'platform', length: 255 })
   platform: string;
