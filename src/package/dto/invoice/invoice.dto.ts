@@ -1,10 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsDateString, IsDecimal, IsInt,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
-  IsNumberString,
-  IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
@@ -47,7 +45,7 @@ export class InvoiceDto extends BaseDto {
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Total Commission can not be empty' })
-  @IsNumber({}, { message: 'Total Commission must be a number'})
+  @IsNumber({}, { message: 'Total Commission must be a number' })
   totalProfit: number;
 
   @ApiProperty()

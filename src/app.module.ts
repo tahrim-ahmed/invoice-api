@@ -10,6 +10,7 @@ import { FilesModule } from './api/files/files.module';
 import { ProductModule } from './api/product/product.module';
 import { ClientModule } from './api/client/client.module';
 import { InvoiceModule } from './api/invoice/invoice.module';
+import { PurchaseModule } from './api/purchase/purchase.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { InvoiceModule } from './api/invoice/invoice.module';
     ProductModule,
     ClientModule,
     InvoiceModule,
+    PurchaseModule,
   ],
   controllers: [],
   providers: [],

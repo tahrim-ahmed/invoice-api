@@ -2,29 +2,27 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-import { InvoiceEntity } from '../../../package/entities/invoice/invoice.entity';
-import { InvoiceDetailsEntity } from '../../../package/entities/invoice/invoice-details.entity';
 import { ProductEntity } from '../../../package/entities/product/product.entity';
 import { ExceptionService } from '../../../package/services/exception.service';
-import { ClientService } from '../../client/services/client.service';
 import { PermissionService } from '../../../package/services/permission.service';
 import { RequestService } from '../../../package/services/request.service';
-import { InvoiceDto } from '../../../package/dto/invoice/invoice.dto';
 import { SystemException } from '../../../package/exceptions/system.exception';
-import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
-import { InvoiceDetailsDto } from '../../../package/dto/invoice/invoice-details.dto';
+import { PurchaseEntity } from '../../../package/entities/purchase/purchase.entity';
+import { PurchaseDetailsEntity } from '../../../package/entities/purchase/purchase-details.entity';
+import { PurchaseDto } from '../../../package/dto/purchase/purchase.dto';
+import { CreatePurchaseDto } from '../../../package/dto/create/create-purchase.dto';
+import { PurchaseDetailsDto } from '../../../package/dto/purchase/purchase-details.dto';
 
 @Injectable()
-export class InvoiceService {
+export class PurchaseService {
   constructor(
-    @InjectRepository(InvoiceEntity)
-    private readonly invoiceRepository: Repository<InvoiceEntity>,
-    @InjectRepository(InvoiceDetailsEntity)
-    private readonly invoiceDetailsRepository: Repository<InvoiceDetailsEntity>,
+    @InjectRepository(PurchaseEntity)
+    private readonly purchaseRepository: Repository<PurchaseEntity>,
+    @InjectRepository(PurchaseDetailsEntity)
+    private readonly purchaseDetailsRepository: Repository<PurchaseDetailsEntity>,
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly exceptionService: ExceptionService,
-    private readonly clientService: ClientService,
     private readonly permissionService: PermissionService,
     private readonly requestService: RequestService,
   ) {}
@@ -33,27 +31,16 @@ export class InvoiceService {
     page: number,
     limit: number,
     search: string,
-  ): Promise<[InvoiceDto[], number]> => {
+  ): Promise<[PurchaseDto[], number]> => {
     try {
-      const query = this.invoiceRepository.createQueryBuilder('q');
+      const query = this.purchaseRepository.createQueryBuilder('q');
 
-      query.select([
-        'q.id',
-        'q.invoiceID',
-        'q.totalTP',
-        'q.totalMRP',
-        'q.totalCommission',
-        'q.others',
-        'q.totalProfit',
-        'q.client',
-        'q.platform',
-      ]);
+      query.select(['q.id', 'q.purchaseID', 'q.totalPrice']);
 
       if (search) {
-        query.andWhere(
-          '((q.invoiceID LIKE  :search) OR (q.client LIKE  :search))',
-          { search: `%${search}%` },
-        );
+        query.andWhere('((q.purchaseID LIKE  :search))', {
+          search: `%${search}%`,
+        });
       }
 
       query.orderBy(`q.date`, 'DESC');
@@ -62,20 +49,9 @@ export class InvoiceService {
         query.skip((page - 1) * limit).take(limit);
       }
 
-      query
-        .innerJoin('q.client', 'client')
-        .addSelect([
-          'client.name',
-          'client.code',
-          'client.cell',
-          'client.email',
-          'client.billing',
-          'client.shipping',
-        ]);
-
       const data = await query.getManyAndCount();
 
-      return [plainToInstance(InvoiceDto, data[0]), data[1]];
+      return [plainToInstance(PurchaseDto, data[0]), data[1]];
     } catch (error) {
       throw new SystemException(error);
     }
@@ -89,9 +65,9 @@ export class InvoiceService {
     search: string,
     startDate: string,
     endDate: string,
-  ): Promise<[InvoiceDto[], number]> => {
+  ): Promise<[PurchaseDto[], number]> => {
     try {
-      const query = this.invoiceRepository.createQueryBuilder('q');
+      const query = this.purchaseRepository.createQueryBuilder('q');
 
       if (startDate && endDate) {
         startDate = new Date(startDate).toISOString().slice(0, 10);
@@ -104,23 +80,13 @@ export class InvoiceService {
       }
 
       query
-        .innerJoin('q.client', 'client')
-        .addSelect([
-          'client.code',
-          'client.name',
-          'client.cell',
-          'client.email',
-          'client.billing',
-          'client.shipping',
-        ])
-        .leftJoinAndSelect('q.invoiceDetails', 'invoiceDetails')
-        .leftJoinAndSelect('invoiceDetails.product', 'product');
+        .leftJoinAndSelect('q.purchaseDetails', 'purchaseDetails')
+        .leftJoinAndSelect('purchaseDetails.product', 'product');
 
       if (search) {
-        query.andWhere(
-          '((q.invoiceID LIKE  :search) OR (q.client LIKE  :search))',
-          { search: `%${search}%` },
-        );
+        query.andWhere('((q.purchaseID LIKE  :search))', {
+          search: `%${search}%`,
+        });
       }
 
       if (sort && sort !== 'undefined') {
@@ -145,38 +111,32 @@ export class InvoiceService {
 
       const data = await query.getManyAndCount();
 
-      return [plainToInstance(InvoiceDto, data[0]), data[1]];
+      return [plainToInstance(PurchaseDto, data[0]), data[1]];
     } catch (error) {
       throw new SystemException(error);
     }
   };
 
-  create = async (invoiceDto: CreateInvoiceDto): Promise<InvoiceDto> => {
+  create = async (purchaseDto: CreatePurchaseDto): Promise<PurchaseDto> => {
     try {
-      invoiceDto.client = await this.clientService.getClient(
-        invoiceDto.clientID,
-      );
+      const purchase = this.purchaseRepository.create(purchaseDto);
+      await this.purchaseRepository.save(purchase);
 
-      const invoice = this.invoiceRepository.create(invoiceDto);
-      await this.invoiceRepository.save(invoice);
+      for (const details of purchaseDto.createPurchaseDetailsDto) {
+        let purDetails = new PurchaseDetailsEntity();
+        purDetails.product = await this.getProduct(details.productID);
+        purDetails.quantity = details.quantity;
+        purDetails.unitPrice = details.unitPrice;
+        purDetails.purchase = purchase;
 
-      for (const details of invoiceDto.createInvoiceDetailsDto) {
-        let invDetails = new InvoiceDetailsEntity();
-        invDetails.product = await this.getProduct(details.productID);
-        invDetails.quantity = details.quantity;
-        invDetails.unitTP = details.unitTP;
-        invDetails.unitMRP = details.unitMRP;
-        invDetails.discount = details.discount;
-        invDetails.invoice = invoice;
+        purDetails =
+          this.requestService.forCreate<PurchaseDetailsEntity>(purDetails);
 
-        invDetails =
-          this.requestService.forCreate<InvoiceDetailsEntity>(invDetails);
-
-        const created = this.invoiceDetailsRepository.create(invDetails);
-        await this.invoiceDetailsRepository.save(created);
+        const created = this.purchaseDetailsRepository.create(purDetails);
+        await this.purchaseDetailsRepository.save(created);
       }
 
-      return this.getInvoice(invoice.id);
+      return this.getPurchase(purchase.id);
     } catch (error) {
       throw new SystemException(error);
     }
@@ -259,54 +219,45 @@ export class InvoiceService {
     }
   };*/
 
-  findById = async (id: string): Promise<InvoiceDto> => {
+  findById = async (id: string): Promise<PurchaseDto> => {
     try {
-      return await this.getInvoice(id);
+      return await this.getPurchase(id);
     } catch (error) {
       throw new SystemException(error);
     }
   };
 
   /********************** Start checking relations of post ********************/
-  getInvoice = async (id: string): Promise<InvoiceDto> => {
-    const invoice = await this.invoiceRepository
+  getPurchase = async (id: string): Promise<PurchaseDto> => {
+    const purchase = await this.purchaseRepository
       .createQueryBuilder('q')
       .where('q.id = :id', { id })
-      .innerJoin('q.client', 'client')
-      .addSelect([
-        'client.name',
-        'client.code',
-        'client.cell',
-        'client.email',
-        'client.billing',
-        'client.shipping',
-      ])
       .getOne();
-    this.exceptionService.notFound(invoice, 'Invoice Not Found!!');
+    this.exceptionService.notFound(purchase, 'Purchase Not Found!!');
 
-    return plainToInstance(InvoiceDto, invoice);
+    return plainToInstance(PurchaseDto, purchase);
   };
 
-  getInvoiceDetailByInvoiceID = async (
-    invoiceID: string,
-  ): Promise<InvoiceDetailsDto> => {
-    const invoiceDetail = await this.invoiceDetailsRepository
+  getPurchaseDetailByPurchaseID = async (
+    purchaseID: string,
+  ): Promise<PurchaseDetailsDto> => {
+    const purchaseDetail = await this.purchaseDetailsRepository
       .createQueryBuilder('q')
-      .where('q.invoice_id =:invID', { invID: invoiceID })
+      .where('q.purchase_id =:purID', { purID: purchaseID })
       .getOne();
     this.exceptionService.notFound(
-      invoiceDetail,
-      'Invoice Details Not Found!!',
+      purchaseDetail,
+      'Purchase Details Not Found!!',
     );
 
-    return plainToInstance(InvoiceDetailsDto, invoiceDetail);
+    return plainToInstance(PurchaseDetailsDto, purchaseDetail);
   };
 
-  async removeInvoiceDetails(invoiceID: string): Promise<boolean> {
-    return !!(await this.invoiceDetailsRepository
+  async removePurchaseDetails(purchaseID: string): Promise<boolean> {
+    return !!(await this.purchaseDetailsRepository
       .createQueryBuilder('q')
-      .where('q.invoice_id =:invID', {
-        invID: invoiceID,
+      .where('q.purchase_id =:purID', {
+        purID: purchaseID,
       })
       .delete());
   }

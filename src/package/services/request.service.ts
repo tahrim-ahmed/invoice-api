@@ -9,7 +9,7 @@ export class RequestService {
 
   forCreate<T extends BaseDto>(dto: T): T {
     if (dto) {
-      dto.createdBy = this.request['_user']?.userID || null;
+      dto.createdBy = this.request['_user']?.response?.userID || null;
 
       dto.updatedBy = dto.createdBy;
 
@@ -21,7 +21,7 @@ export class RequestService {
 
   forUpdate<T extends BaseDto>(dto: T): T {
     if (dto) {
-      dto.updatedBy = this.request['_user']?.userID || null;
+      dto.updatedBy = this.request['_user']?.response?.userID || null;
 
       return dto;
     } else {
