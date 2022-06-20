@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDateString,
   IsNotEmpty,
-  IsNumber,
+  IsNumber, IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
@@ -27,6 +27,23 @@ export class InvoiceDto extends BaseDto {
   @IsString({ message: 'Platform must be a string' })
   @MaxLength(255, { message: 'Platform less than 255 characters' })
   platform: string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Payment can not be empty' })
+  @IsString({ message: 'Payment must be a string' })
+  @MaxLength(255, { message: 'Payment less than 255 characters' })
+  payment: string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Payment type can not be empty' })
+  @IsString({ message: 'Payment type must be a string' })
+  @MaxLength(255, { message: 'Payment type less than 255 characters' })
+  paymentType: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsDateString({ strict: true })
+  creditPeriod: Date | string;
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Total TP can not be empty' })

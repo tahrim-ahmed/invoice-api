@@ -23,6 +23,19 @@ export class InvoiceEntity extends CustomBaseEntity {
   @Column({ type: 'varchar', name: 'platform', length: 255 })
   platform: string;
 
+  @Column({ type: 'varchar', name: 'payment', length: 255 })
+  payment: string;
+
+  @Column({ type: 'varchar', name: 'payment_type', length: 255 })
+  paymentType: string;
+
+  @Column({
+    type: 'date',
+    name: 'credit_period',
+    nullable: true,
+  })
+  creditPeriod: Date | string;
+
   @Column({
     type: 'decimal',
     name: 'total_tp',
