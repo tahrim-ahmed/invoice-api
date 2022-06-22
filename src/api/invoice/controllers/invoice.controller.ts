@@ -4,6 +4,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { InvoiceService } from '../services/invoice.service';
@@ -133,6 +135,19 @@ export class InvoiceController {
       HttpStatus.CREATED,
       'Invoice successfully added!!',
       invoice,
+    );
+  }
+
+  @ApiOkResponse({ description: 'Invoice successfully marked as paid!' })
+  @Patch('paid/:id')
+  verify(
+    @Param('id', new UuidValidationPipe()) id: string,
+  ): Promise<ResponseDto> {
+    const verified = this.invoiceService.paid(id);
+    return this.responseService.toResponse(
+      HttpStatus.OK,
+      'Invoice successfully marked as paid!',
+      verified,
     );
   }
 

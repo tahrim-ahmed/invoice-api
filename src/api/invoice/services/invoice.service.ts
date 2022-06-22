@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
@@ -97,7 +97,7 @@ export class InvoiceService {
         startDate = new Date(startDate).toISOString().slice(0, 10);
         endDate = new Date(endDate).toISOString().slice(0, 10);
 
-        query.andWhere('DATE(q.date)  between :startDate and :endDate', {
+        query.andWhere('DATE(q.orderDate)  between :startDate and :endDate', {
           startDate,
           endDate,
         });
@@ -118,7 +118,7 @@ export class InvoiceService {
 
       if (search) {
         query.andWhere(
-          '((q.invoiceID LIKE  :search) OR (q.client LIKE  :search))',
+          '((client.name LIKE  :search) OR (client.code LIKE  :search))',
           { search: `%${search}%` },
         );
       }
@@ -177,6 +177,29 @@ export class InvoiceService {
       }
 
       return this.getInvoice(invoice.id);
+    } catch (error) {
+      throw new SystemException(error);
+    }
+  };
+
+  paid = async (id: string): Promise<boolean> => {
+    try {
+      const savedInvoice = await this.getInvoice(id);
+      if (savedInvoice.payment === 'Paid') {
+        throw new SystemException({
+          status: HttpStatus.FORBIDDEN,
+          message: 'Already paid',
+        });
+      }
+
+      savedInvoice.payment = 'Paid';
+      savedInvoice.creditPeriod = null;
+
+      await this.invoiceRepository.save({
+        ...savedInvoice,
+      });
+
+      return Promise.resolve(true);
     } catch (error) {
       throw new SystemException(error);
     }
