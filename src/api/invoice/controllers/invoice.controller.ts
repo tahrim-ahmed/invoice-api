@@ -24,6 +24,7 @@ import { ResponseDto } from '../../../package/dto/response/response.dto';
 import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
 import { DtoValidationPipe } from '../../../package/pipes/dto-validation.pipe';
 import { UuidValidationPipe } from '../../../package/pipes/uuid-validation.pipe';
+import { PartialPaymentDto } from '../../../package/dto/invoice/partial-payment.dto';
 
 @ApiTags('Invoice')
 @ApiBearerAuth()
@@ -140,14 +141,33 @@ export class InvoiceController {
 
   @ApiOkResponse({ description: 'Invoice successfully marked as paid!' })
   @Patch('paid/:id')
-  verify(
+  paid(
     @Param('id', new UuidValidationPipe()) id: string,
   ): Promise<ResponseDto> {
-    const verified = this.invoiceService.paid(id);
+    const paid = this.invoiceService.paid(id);
     return this.responseService.toResponse(
       HttpStatus.OK,
       'Invoice successfully marked as paid!',
-      verified,
+      paid,
+    );
+  }
+
+  @ApiOkResponse({ description: 'Successfully submitted partial payment!' })
+  @Patch('partial-pay')
+  partialPayment(
+    @Body(
+      new DtoValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    )
+    partialPayment: PartialPaymentDto,
+  ): Promise<ResponseDto> {
+    const partialPay = this.invoiceService.partialPayment(partialPayment);
+    return this.responseService.toResponse(
+      HttpStatus.OK,
+      'Successfully submitted partial payment!',
+      partialPay,
     );
   }
 

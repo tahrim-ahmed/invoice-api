@@ -13,6 +13,7 @@ import { InvoiceDto } from '../../../package/dto/invoice/invoice.dto';
 import { SystemException } from '../../../package/exceptions/system.exception';
 import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
 import { InvoiceDetailsDto } from '../../../package/dto/invoice/invoice-details.dto';
+import { PartialPaymentDto } from '../../../package/dto/invoice/partial-payment.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -118,7 +119,7 @@ export class InvoiceService {
 
       if (search) {
         query.andWhere(
-          '((client.name LIKE  :search) OR (client.code LIKE  :search))',
+          '((q.invoiceID LIKE  :search) OR (client.code LIKE  :search) OR (client.name LIKE  :search))',
           { search: `%${search}%` },
         );
       }
@@ -157,6 +158,23 @@ export class InvoiceService {
         invoiceDto.clientID,
       );
 
+      const date = new Date();
+      const year = date.getFullYear().toString();
+      const month = date.getMonth().toString();
+      const day = date.getDate().toString();
+      const hours = date.getHours().toString();
+      const minute = date.getMinutes().toString();
+
+      invoiceDto.invoiceID = year
+        .concat(month)
+        .concat(day)
+        .concat(hours)
+        .concat(minute);
+
+      invoiceDto.paymentType === 'Cash'
+        ? (invoiceDto.paidAmount = invoiceDto.totalMRP)
+        : (invoiceDto.paidAmount = 0);
+
       const invoice = this.invoiceRepository.create(invoiceDto);
       await this.invoiceRepository.save(invoice);
 
@@ -194,6 +212,39 @@ export class InvoiceService {
 
       savedInvoice.payment = 'Paid';
       savedInvoice.creditPeriod = null;
+      savedInvoice.paidAmount = savedInvoice.totalMRP;
+
+      await this.invoiceRepository.save({
+        ...savedInvoice,
+      });
+
+      return Promise.resolve(true);
+    } catch (error) {
+      throw new SystemException(error);
+    }
+  };
+
+  partialPayment = async (
+    partialPaymentDto: PartialPaymentDto,
+  ): Promise<boolean> => {
+    try {
+      const savedInvoice = await this.getInvoice(partialPaymentDto.id);
+      if (savedInvoice.payment === 'Paid') {
+        throw new SystemException({
+          status: HttpStatus.FORBIDDEN,
+          message: 'Already paid',
+        });
+      }
+
+      if (
+        savedInvoice.totalMRP - savedInvoice.paidAmount ===
+        partialPaymentDto.amount
+      ) {
+        savedInvoice.payment = 'Paid';
+        savedInvoice.creditPeriod = null;
+      }
+
+      savedInvoice.paidAmount += partialPaymentDto.amount;
 
       await this.invoiceRepository.save({
         ...savedInvoice,

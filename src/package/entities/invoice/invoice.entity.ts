@@ -7,6 +7,13 @@ import { ClientEntity } from '../client/client.entity';
 @Entity({ name: 'invoices' })
 export class InvoiceEntity extends CustomBaseEntity {
   @Column({
+    type: 'varchar',
+    name: 'invoice_id',
+    nullable: true,
+  })
+  invoiceID: string;
+
+  @Column({
     type: 'date',
     name: 'order_date',
     nullable: false,
@@ -85,6 +92,16 @@ export class InvoiceEntity extends CustomBaseEntity {
     transformer: new StringToNumericTransformer(),
   })
   totalProfit: number;
+
+  @Column({
+    type: 'decimal',
+    name: 'paid_amount',
+    precision: 20,
+    scale: 6,
+    default: () => "'0.000000'",
+    transformer: new StringToNumericTransformer(),
+  })
+  paidAmount: number;
 
   @OneToMany(
     () => InvoiceDetailsEntity,

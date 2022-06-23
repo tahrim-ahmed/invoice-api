@@ -14,6 +14,10 @@ import { ClientDto } from '../client/client.dto';
 
 export class InvoiceDto extends BaseDto {
   @ApiProperty()
+  @IsOptional()
+  invoiceID: string;
+
+  @ApiProperty()
   @IsNotEmpty({ message: 'Date can not be empty' })
   @IsDateString({ strict: true })
   orderDate: Date | string;
@@ -70,6 +74,11 @@ export class InvoiceDto extends BaseDto {
   @IsNotEmpty({ message: 'Others can not be empty' })
   @IsNumber({}, { message: 'Others must be a number' })
   others: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber({}, { message: 'Others must be a number' })
+  paidAmount: number;
 
   @Type(() => ClientDto)
   client: ClientDto;
