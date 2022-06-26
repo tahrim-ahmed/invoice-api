@@ -12,6 +12,8 @@ import { PurchaseDetailsEntity } from '../../../package/entities/purchase/purcha
 import { PurchaseDto } from '../../../package/dto/purchase/purchase.dto';
 import { CreatePurchaseDto } from '../../../package/dto/create/create-purchase.dto';
 import { PurchaseDetailsDto } from '../../../package/dto/purchase/purchase-details.dto';
+import { StatementService } from '../../statement/services/statement.service';
+import { StatementEntity } from '../../../package/entities/statement/statement.entity';
 
 @Injectable()
 export class PurchaseService {
@@ -22,6 +24,7 @@ export class PurchaseService {
     private readonly purchaseDetailsRepository: Repository<PurchaseDetailsEntity>,
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
+    private readonly statementService: StatementService,
     private readonly exceptionService: ExceptionService,
     private readonly permissionService: PermissionService,
     private readonly requestService: RequestService,
@@ -135,6 +138,18 @@ export class PurchaseService {
         const created = this.purchaseDetailsRepository.create(purDetails);
         await this.purchaseDetailsRepository.save(created);
       }
+
+      let statements = new StatementEntity();
+
+      statements.referenceID = purchase.id;
+      purchase.type === 'Cash'
+        ? (statements.purpose = 'Paid to Bayer')
+        : (statements.purpose = 'Bayer Receivable');
+      statements.amount = Number(purchase.totalPrice);
+
+      statements = this.requestService.forCreate<StatementEntity>(statements);
+
+      await this.statementService.create(statements);
 
       return this.getPurchase(purchase.id);
     } catch (error) {

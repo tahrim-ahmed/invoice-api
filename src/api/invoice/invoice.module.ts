@@ -10,6 +10,7 @@ import { ResponseService } from '../../package/services/response.service';
 import { ExceptionService } from '../../package/services/exception.service';
 import { RequestService } from '../../package/services/request.service';
 import { PermissionService } from '../../package/services/permission.service';
+import { StatementModule } from '../statement/statement.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PermissionService } from '../../package/services/permission.service';
       ProductEntity,
     ]),
     ClientModule,
+    StatementModule,
   ],
   controllers: [InvoiceController],
   providers: [

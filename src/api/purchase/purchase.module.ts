@@ -9,6 +9,7 @@ import { RequestService } from '../../package/services/request.service';
 import { PermissionService } from '../../package/services/permission.service';
 import { PurchaseEntity } from '../../package/entities/purchase/purchase.entity';
 import { PurchaseDetailsEntity } from '../../package/entities/purchase/purchase-details.entity';
+import { StatementModule } from '../statement/statement.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PurchaseDetailsEntity } from '../../package/entities/purchase/purchase-
       PurchaseDetailsEntity,
       ProductEntity,
     ]),
+    StatementModule,
   ],
   controllers: [PurchaseController],
   providers: [

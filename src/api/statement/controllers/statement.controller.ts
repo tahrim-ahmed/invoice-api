@@ -5,8 +5,8 @@ import {
   Get,
   HttpStatus,
   Param,
-  Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -16,27 +16,36 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { InvoiceService } from '../services/invoice.service';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
+import { StatementService } from '../services/statement.service';
 import { ResponseService } from '../../../package/services/response.service';
 import { RequestService } from '../../../package/services/request.service';
 import { IntValidationPipe } from '../../../package/pipes/int-validation.pipe';
 import { ResponseDto } from '../../../package/dto/response/response.dto';
-import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
 import { DtoValidationPipe } from '../../../package/pipes/dto-validation.pipe';
 import { UuidValidationPipe } from '../../../package/pipes/uuid-validation.pipe';
-import { PartialPaymentDto } from '../../../package/dto/invoice/partial-payment.dto';
+import { StatementDto } from '../../../package/dto/statement/statement.dto';
 
-@ApiTags('Invoice')
+@ApiTags('Statement')
 @ApiBearerAuth()
-@Controller('invoice')
-export class InvoiceController {
+@Controller('statement')
+export class StatementController {
   constructor(
-    private invoiceService: InvoiceService,
+    private statementService: StatementService,
     private readonly responseService: ResponseService,
     private readonly requestService: RequestService,
   ) {}
 
+  @ApiImplicitQuery({
+    name: 'page',
+    required: false,
+    type: String,
+  })
+  @ApiImplicitQuery({
+    name: 'limit',
+    required: false,
+    type: String,
+  })
   @ApiImplicitQuery({
     name: 'search',
     required: false,
@@ -48,16 +57,26 @@ export class InvoiceController {
     @Query('limit', new IntValidationPipe()) limit: number,
     @Query('search') search: string,
   ): Promise<ResponseDto> {
-    const invoices = this.invoiceService.search(page, limit, search);
+    const allStatements = this.statementService.search(page, limit, search);
     return this.responseService.toPaginationResponse(
       HttpStatus.OK,
       null,
       page,
       limit,
-      invoices,
+      allStatements,
     );
   }
 
+  @ApiImplicitQuery({
+    name: 'page',
+    required: true,
+    type: String,
+  })
+  @ApiImplicitQuery({
+    name: 'limit',
+    required: true,
+    type: String,
+  })
   @ApiImplicitQuery({
     name: 'sort',
     required: false,
@@ -69,22 +88,7 @@ export class InvoiceController {
     type: String,
   })
   @ApiImplicitQuery({
-    name: 'client',
-    required: false,
-    type: String,
-  })
-  @ApiImplicitQuery({
     name: 'search',
-    required: false,
-    type: String,
-  })
-  @ApiImplicitQuery({
-    name: 'startDate',
-    required: false,
-    type: String,
-  })
-  @ApiImplicitQuery({
-    name: 'endDate',
     required: false,
     type: String,
   })
@@ -94,33 +98,28 @@ export class InvoiceController {
     @Query('limit', new IntValidationPipe()) limit: number,
     @Query('sort') sort: string,
     @Query('order') order: string,
-    @Query('client') client: string,
     @Query('search') search: string,
-    @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string,
   ): Promise<ResponseDto> {
-    const invoices = this.invoiceService.pagination(
+    const allStatement = this.statementService.pagination(
       page,
       limit,
       sort,
       order,
       search,
-      startDate,
-      endDate,
     );
     return this.responseService.toPaginationResponse(
       HttpStatus.OK,
       null,
       page,
       limit,
-      invoices,
+      allStatement,
     );
   }
 
   @ApiCreatedResponse({
-    description: 'Invoice successfully added!!',
+    description: 'Statement successfully added!!',
   })
-  @ApiBody({ type: CreateInvoiceDto })
+  @ApiBody({ type: StatementDto })
   @Post()
   create(
     @Body(
@@ -129,53 +128,21 @@ export class InvoiceController {
         forbidNonWhitelisted: true,
       }),
     )
-    invoiceDto: CreateInvoiceDto,
+    statementDto: StatementDto,
   ): Promise<ResponseDto> {
-    const modifiedDto = this.requestService.forCreate(invoiceDto);
-    const invoice = this.invoiceService.create(modifiedDto);
+    const modifiedDto = this.requestService.forCreate(statementDto);
+    const statement = this.statementService.create(modifiedDto);
     return this.responseService.toDtoResponse(
       HttpStatus.CREATED,
-      'Invoice successfully added!!',
-      invoice,
+      'Statement successfully added!!',
+      statement,
     );
   }
 
-  @ApiOkResponse({ description: 'Invoice successfully marked as paid!' })
-  @Patch('paid/:id')
-  paid(
-    @Param('id', new UuidValidationPipe()) id: string,
-  ): Promise<ResponseDto> {
-    const paid = this.invoiceService.paid(id);
-    return this.responseService.toResponse(
-      HttpStatus.OK,
-      'Invoice successfully marked as paid!',
-      paid,
-    );
-  }
-
-  @ApiOkResponse({ description: 'Successfully submitted partial payment!' })
-  @Patch('partial-pay')
-  partialPayment(
-    @Body(
-      new DtoValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
-    )
-    partialPayment: PartialPaymentDto,
-  ): Promise<ResponseDto> {
-    const partialPay = this.invoiceService.partialPayment(partialPayment);
-    return this.responseService.toResponse(
-      HttpStatus.OK,
-      'Successfully submitted partial payment!',
-      partialPay,
-    );
-  }
-
-  /*@ApiOkResponse({
-    description: 'Invoice successfully updated!!',
+  @ApiOkResponse({
+    description: 'Statement successfully updated!!',
   })
-  @ApiBody({ type: CreateInvoiceDto })
+  @ApiBody({ type: StatementDto })
   @Put(':id')
   update(
     @Param('id', new UuidValidationPipe()) id: string,
@@ -186,35 +153,27 @@ export class InvoiceController {
         forbidNonWhitelisted: true,
       }),
     )
-    invoiceDto: CreateInvoiceDto,
+    statementDto: StatementDto,
   ): Promise<ResponseDto> {
-    const modifiedDto = this.requestService.forUpdate(invoiceDto);
-    const invoice = this.invoiceService.update(id, modifiedDto);
+    const modifiedDto = this.requestService.forUpdate(statementDto);
+    const statement = this.statementService.update(id, modifiedDto);
     return this.responseService.toDtoResponse(
       HttpStatus.OK,
-      'Invoice successfully updated!!',
-      invoice,
+      'Statement successfully updated!!',
+      statement,
     );
-  }*/
+  }
 
-  @ApiOkResponse({ description: 'Invoice successfully deleted!' })
+  @ApiOkResponse({ description: 'Statement successfully deleted!' })
   @Delete(':id')
   remove(
     @Param('id', new UuidValidationPipe()) id: string,
   ): Promise<ResponseDto> {
-    const deleted = this.invoiceService.remove(id);
+    const deleted = this.statementService.remove(id);
     return this.responseService.toResponse(
       HttpStatus.OK,
-      'Invoice successfully deleted!',
+      'Statement successfully deleted!',
       deleted,
     );
-  }
-
-  @Get(':id')
-  findById(
-    @Param('id', new UuidValidationPipe()) id: string,
-  ): Promise<ResponseDto> {
-    const invoices = this.invoiceService.findById(id);
-    return this.responseService.toDtoResponse(HttpStatus.OK, null, invoices);
   }
 }

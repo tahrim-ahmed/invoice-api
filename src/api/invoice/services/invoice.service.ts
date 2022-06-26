@@ -14,6 +14,9 @@ import { SystemException } from '../../../package/exceptions/system.exception';
 import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
 import { InvoiceDetailsDto } from '../../../package/dto/invoice/invoice-details.dto';
 import { PartialPaymentDto } from '../../../package/dto/invoice/partial-payment.dto';
+import { StatementService } from '../../statement/services/statement.service';
+import { StatementEntity } from '../../../package/entities/statement/statement.entity';
+import { DeleteDto } from '../../../package/dto/response/delete.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -26,6 +29,7 @@ export class InvoiceService {
     private readonly productRepository: Repository<ProductEntity>,
     private readonly exceptionService: ExceptionService,
     private readonly clientService: ClientService,
+    private readonly statementService: StatementService,
     private readonly permissionService: PermissionService,
     private readonly requestService: RequestService,
   ) {}
@@ -194,6 +198,18 @@ export class InvoiceService {
         await this.invoiceDetailsRepository.save(created);
       }
 
+      let statements = new StatementEntity();
+
+      statements.referenceID = invoice.id;
+      invoice.paymentType === 'Cash'
+        ? (statements.purpose = 'Paid by Customer')
+        : (statements.purpose = 'Customer Payable');
+      statements.amount = Number(invoice.totalMRP);
+
+      statements = this.requestService.forCreate<StatementEntity>(statements);
+
+      await this.statementService.create(statements);
+
       return this.getInvoice(invoice.id);
     } catch (error) {
       throw new SystemException(error);
@@ -209,6 +225,18 @@ export class InvoiceService {
           message: 'Already paid',
         });
       }
+
+      let statements = new StatementEntity();
+
+      statements.referenceID = savedInvoice.id;
+      statements.purpose = 'Paid by Customer';
+      statements.amount = Number(
+        Number(Number(savedInvoice.totalMRP) - Number(savedInvoice.paidAmount)),
+      );
+
+      statements = this.requestService.forCreate<StatementEntity>(statements);
+
+      await this.statementService.create(statements);
 
       savedInvoice.payment = 'Paid';
       savedInvoice.creditPeriod = null;
@@ -249,6 +277,16 @@ export class InvoiceService {
       await this.invoiceRepository.save({
         ...savedInvoice,
       });
+
+      let statements = new StatementEntity();
+
+      statements.referenceID = savedInvoice.id;
+      statements.purpose = 'Paid by Customer';
+      statements.amount = Number(partialPaymentDto.amount);
+
+      statements = this.requestService.forCreate<StatementEntity>(statements);
+
+      await this.statementService.create(statements);
 
       return Promise.resolve(true);
     } catch (error) {
@@ -316,22 +354,17 @@ export class InvoiceService {
     }
   };*/
 
-  /*remove = async (id: string): Promise<DeleteDto> => {
+  remove = async (id: string): Promise<DeleteDto> => {
     try {
-      const savedInvoice = await this.getInvoice(id);
-
-      await this.softRemoveInvoiceDetails(id);
-
-      await this.invoiceRepository.save({
-        ...savedInvoice,
-        ...isInActive,
+      const deletedInvoice = await this.invoiceRepository.softDelete({
+        id,
       });
 
-      return Promise.resolve(new DeleteDto(true));
+      return Promise.resolve(new DeleteDto(!!deletedInvoice.affected));
     } catch (error) {
       throw new SystemException(error);
     }
-  };*/
+  };
 
   findById = async (id: string): Promise<InvoiceDto> => {
     try {
@@ -379,10 +412,10 @@ export class InvoiceService {
   async removeInvoiceDetails(invoiceID: string): Promise<boolean> {
     return !!(await this.invoiceDetailsRepository
       .createQueryBuilder('q')
-      .where('q.invoice_id =:invID', {
+      .where('q.invoiceID =:invID', {
         invID: invoiceID,
       })
-      .delete());
+      .softDelete());
   }
 
   getProduct = async (id: string): Promise<ProductEntity> => {
