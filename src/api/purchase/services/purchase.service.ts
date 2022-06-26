@@ -143,8 +143,8 @@ export class PurchaseService {
 
       statements.referenceID = purchase.id;
       purchase.type === 'Cash'
-        ? (statements.purpose = 'Paid to Bayer')
-        : (statements.purpose = 'Bayer Receivable');
+        ? (statements.purpose = 'Paid to BAYER')
+        : (statements.purpose = 'BAYER Receivable');
       statements.amount = Number(purchase.totalPrice);
 
       statements = this.requestService.forCreate<StatementEntity>(statements);
