@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { BaseDto } from '../core/base.dto';
 
 export class StatementDto extends BaseDto {
@@ -15,7 +21,7 @@ export class StatementDto extends BaseDto {
   amount: number;
 
   @ApiProperty()
-  @IsNotEmpty({ message: 'Reference can not be empty' })
+  @IsOptional()
   @IsString({ message: 'Reference must be a string' })
   @MaxLength(255, { message: 'Reference less than 255 characters' })
   referenceID: string;

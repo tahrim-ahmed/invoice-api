@@ -17,6 +17,6 @@ export class StatementEntity extends CustomBaseEntity {
   })
   amount: number;
 
-  @Column({ type: 'varchar', name: 'reference_id', length: 255 })
+  @Column({ type: 'varchar', name: 'reference_id', length: 255, nullable: true })
   referenceID: string;
 }
