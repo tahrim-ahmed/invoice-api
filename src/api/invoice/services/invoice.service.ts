@@ -360,6 +360,8 @@ export class InvoiceService {
         id,
       });
 
+      await this.statementService.removeByReference(id);
+
       return Promise.resolve(new DeleteDto(!!deletedInvoice.affected));
     } catch (error) {
       throw new SystemException(error);

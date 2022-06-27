@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -11,6 +12,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { PurchaseService } from '../services/purchase.service';
@@ -155,18 +157,18 @@ export class PurchaseController {
     );
   }*/
 
-  /* @ApiOkResponse({ description: 'Invoice successfully deleted!' })
+  @ApiOkResponse({ description: 'Purchase successfully deleted!' })
   @Delete(':id')
   remove(
     @Param('id', new UuidValidationPipe()) id: string,
   ): Promise<ResponseDto> {
-    const deleted = this.invoiceService.remove(id);
+    const deleted = this.purchaseService.remove(id);
     return this.responseService.toResponse(
       HttpStatus.OK,
-      'Invoice successfully deleted!',
+      'Purchase successfully deleted!',
       deleted,
     );
-  }*/
+  }
 
   @Get(':id')
   findById(

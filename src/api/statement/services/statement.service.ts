@@ -138,12 +138,9 @@ export class StatementService {
 
   removeByReference = async (referenceID: string): Promise<DeleteDto> => {
     try {
-      const statementByReference = await this.getStatementByReference(
-        referenceID,
-      );
-      const deletedStatement = await this.statementRepository.softDelete(
-        statementByReference.id,
-      );
+      const deletedStatement = await this.statementRepository.softDelete({
+        referenceID: referenceID,
+      });
       return Promise.resolve(new DeleteDto(!!deletedStatement.affected));
     } catch (error) {
       throw new SystemException(error);
@@ -166,7 +163,7 @@ export class StatementService {
   ): Promise<StatementDto> => {
     const statement = await this.statementRepository
       .createQueryBuilder('q')
-      .andWhere('q.referenceID =:id', { referenceID: referenceID })
+      .andWhere('q.reference_id =:id', { referenceID: referenceID })
       .getOneOrFail();
 
     this.exceptionService.notFound(statement, 'Statement Not Found!!');

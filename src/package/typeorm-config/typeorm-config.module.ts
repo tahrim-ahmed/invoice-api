@@ -11,6 +11,7 @@ import { InvoiceDetailsEntity } from '../entities/invoice/invoice-details.entity
 import { PurchaseEntity } from '../entities/purchase/purchase.entity';
 import { PurchaseDetailsEntity } from '../entities/purchase/purchase-details.entity';
 import { StatementEntity } from '../entities/statement/statement.entity';
+import { StockEntity } from '../entities/stock/stock.entity';
 
 @Global()
 @Module({
@@ -35,6 +36,7 @@ import { StatementEntity } from '../entities/statement/statement.entity';
           PurchaseEntity,
           PurchaseDetailsEntity,
           StatementEntity,
+          StockEntity,
         ],
         synchronize: <boolean>(
           (configService.get<number>('DATABASE_SYNCRONIZE') == 1)

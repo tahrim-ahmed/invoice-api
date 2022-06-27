@@ -14,6 +14,7 @@ import { CreatePurchaseDto } from '../../../package/dto/create/create-purchase.d
 import { PurchaseDetailsDto } from '../../../package/dto/purchase/purchase-details.dto';
 import { StatementService } from '../../statement/services/statement.service';
 import { StatementEntity } from '../../../package/entities/statement/statement.entity';
+import { DeleteDto } from '../../../package/dto/response/delete.dto';
 
 @Injectable()
 export class PurchaseService {
@@ -143,7 +144,7 @@ export class PurchaseService {
 
       statements.referenceID = purchase.id;
       purchase.type === 'Cash'
-        ? (statements.purpose = 'Paid to BAYER')
+        ? (statements.purpose = 'Purchased on Cash')
         : (statements.purpose = 'BAYER Receivable');
       statements.amount = Number(purchase.totalPrice);
 
@@ -217,22 +218,19 @@ export class PurchaseService {
     }
   };*/
 
-  /*remove = async (id: string): Promise<DeleteDto> => {
+  remove = async (id: string): Promise<DeleteDto> => {
     try {
-      const savedInvoice = await this.getInvoice(id);
-
-      await this.softRemoveInvoiceDetails(id);
-
-      await this.invoiceRepository.save({
-        ...savedInvoice,
-        ...isInActive,
+      const deletedInvoice = await this.purchaseRepository.softDelete({
+        id,
       });
 
-      return Promise.resolve(new DeleteDto(true));
+      await this.statementService.removeByReference(id);
+
+      return Promise.resolve(new DeleteDto(!!deletedInvoice.affected));
     } catch (error) {
       throw new SystemException(error);
     }
-  };*/
+  };
 
   findById = async (id: string): Promise<PurchaseDto> => {
     try {
