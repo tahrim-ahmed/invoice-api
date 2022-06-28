@@ -10,6 +10,7 @@ import { DeleteDto } from '../../../package/dto/response/delete.dto';
 import { StockEntity } from '../../../package/entities/stock/stock.entity';
 import { CreateStockDto } from '../../../package/dto/create/create-stock.dto';
 import { StockDto } from '../../../package/dto/stock/stock.dto';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class StockService {
@@ -111,10 +112,36 @@ export class StockService {
     }
   };
 
+  @OnEvent('stock.create', { async: true })
+  async handleStockCreateEvent(stockDto: CreateStockDto) {
+    await this.create(stockDto);
+  }
+
   create = async (stockDto: CreateStockDto): Promise<StockDto> => {
     try {
-      const productAvailable = this.getStockByProduct(stockDto.productID);
-      const stock = this.stockRepository.create(stockDto);
+      const productAvailable = await this.checkProductAvailable(
+        stockDto.productID,
+      );
+
+      let stock;
+
+      if (productAvailable) {
+        const savedStock = await this.getStockByProduct(stockDto.productID);
+
+        savedStock.quantity += stockDto.quantity;
+
+        stock = {
+          ...savedStock,
+          ...stockDto,
+        };
+      } else {
+        stock = this.stockRepository.create(stockDto);
+      }
+
+      stock.product = await this.productRepository.find({
+        id: stockDto.productID,
+      });
+      console.log(stock);
       await this.stockRepository.save(stock);
 
       return this.getStock(stock.id);
@@ -222,6 +249,14 @@ export class StockService {
     this.exceptionService.notFound(stock, 'Stock Not Found!!');
 
     return plainToInstance(StockDto, stock);
+  };
+
+  checkProductAvailable = async (productID: string): Promise<boolean> => {
+    const alreadyAvailable = await this.stockRepository
+      .createQueryBuilder('q')
+      .where('q.product_id =:productID', { productID: productID })
+      .getCount();
+    return Promise.resolve(!!alreadyAvailable);
   };
   /*********************** End checking relations of post *********************/
 }

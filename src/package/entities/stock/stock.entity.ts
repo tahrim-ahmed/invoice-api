@@ -7,10 +7,7 @@ export class StockEntity extends CustomBaseEntity {
   @Column({ type: 'integer', name: 'quantity', nullable: false })
   quantity: number;
 
-  @OneToOne(
-    () => ProductEntity,
-    (productEntity) => productEntity.invoiceDetails,
-  )
+  @OneToOne(() => ProductEntity, (productEntity) => productEntity.stock)
   @JoinColumn({ name: 'product_id' })
   product: ProductEntity;
 }

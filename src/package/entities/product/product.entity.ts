@@ -9,6 +9,7 @@ import {
 import { CustomBaseEntity } from '../core/custom-base.entity';
 import { InvoiceDetailsEntity } from '../invoice/invoice-details.entity';
 import { StockEntity } from '../stock/stock.entity';
+import { PurchaseDetailsEntity } from '../purchase/purchase-details.entity';
 
 @Entity({ name: 'products' })
 @Index('products-name-deletedat-idx', ['name', 'deletedAt'])
@@ -27,7 +28,14 @@ export class ProductEntity extends CustomBaseEntity {
   @JoinColumn({ name: 'product_id' })
   invoiceDetails: InvoiceDetailsEntity[];
 
+  @OneToMany(
+    () => PurchaseDetailsEntity,
+    (purchaseDetailsEntity) => purchaseDetailsEntity.product,
+  )
+  @JoinColumn({ name: 'product_id' })
+  purchaseDetails: PurchaseDetailsEntity[];
+
   @OneToOne(() => StockEntity, (stockEntity) => stockEntity.product)
   @JoinColumn({ name: 'product_id' })
-  stock: StockEntity[];
+  stock: StockEntity;
 }

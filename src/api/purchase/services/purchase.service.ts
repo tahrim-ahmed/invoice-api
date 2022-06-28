@@ -15,6 +15,8 @@ import { PurchaseDetailsDto } from '../../../package/dto/purchase/purchase-detai
 import { StatementService } from '../../statement/services/statement.service';
 import { StatementEntity } from '../../../package/entities/statement/statement.entity';
 import { DeleteDto } from '../../../package/dto/response/delete.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CreateStockDto } from '../../../package/dto/create/create-stock.dto';
 
 @Injectable()
 export class PurchaseService {
@@ -26,6 +28,7 @@ export class PurchaseService {
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly statementService: StatementService,
+    private readonly eventEmitter: EventEmitter2,
     private readonly exceptionService: ExceptionService,
     private readonly permissionService: PermissionService,
     private readonly requestService: RequestService,
@@ -138,6 +141,13 @@ export class PurchaseService {
 
         const created = this.purchaseDetailsRepository.create(purDetails);
         await this.purchaseDetailsRepository.save(created);
+
+        let createStockDto = new CreateStockDto();
+        createStockDto = this.requestService.forCreate(createStockDto);
+        createStockDto.productID = details.productID;
+        createStockDto.quantity = details.quantity;
+
+        this.eventEmitter.emit('stock.create', createStockDto);
       }
 
       let statements = new StatementEntity();

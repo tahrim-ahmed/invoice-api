@@ -21,7 +21,7 @@ export class PurchaseDetailsEntity extends CustomBaseEntity {
 
   @ManyToOne(
     () => ProductEntity,
-    (productEntity) => productEntity.invoiceDetails,
+    (productEntity) => productEntity.purchaseDetails,
   )
   @JoinColumn({ name: 'product_id' })
   product: ProductEntity;

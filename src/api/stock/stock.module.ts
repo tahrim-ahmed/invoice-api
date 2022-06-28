@@ -7,20 +7,12 @@ import { ResponseService } from '../../package/services/response.service';
 import { ExceptionService } from '../../package/services/exception.service';
 import { RequestService } from '../../package/services/request.service';
 import { PermissionService } from '../../package/services/permission.service';
-import { PurchaseEntity } from '../../package/entities/purchase/purchase.entity';
-import { PurchaseDetailsEntity } from '../../package/entities/purchase/purchase-details.entity';
-import { StatementModule } from '../statement/statement.module';
+import { StockEntity } from '../../package/entities/stock/stock.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      PurchaseEntity,
-      PurchaseDetailsEntity,
-      ProductEntity,
-    ]),
-    StatementModule,
-  ],
+  imports: [TypeOrmModule.forFeature([StockEntity, ProductEntity])],
   controllers: [StockController],
+  exports: [StockService],
   providers: [
     StockService,
     ResponseService,

@@ -3,6 +3,7 @@ import { configEnvironment } from './package/env-config/env-config';
 import { AuthMiddleware } from './package/middlewares/auth.middleware';
 import { publicUrls } from './public.url';
 import { configTypeorm } from './package/typeorm-config/typeorm.config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RoleModule } from './api/role/role.module';
 import { UserModule } from './api/users/user.module';
 import { AuthModule } from './api/auth/auth.module';
@@ -12,11 +13,13 @@ import { ClientModule } from './api/client/client.module';
 import { InvoiceModule } from './api/invoice/invoice.module';
 import { PurchaseModule } from './api/purchase/purchase.module';
 import { StatementModule } from './api/statement/statement.module';
+import { StockModule } from './api/stock/stock.module';
 
 @Module({
   imports: [
     configEnvironment(),
     configTypeorm(),
+    EventEmitterModule.forRoot(),
     AuthModule,
     RoleModule,
     UserModule,
@@ -26,6 +29,7 @@ import { StatementModule } from './api/statement/statement.module';
     InvoiceModule,
     PurchaseModule,
     StatementModule,
+    StockModule,
   ],
   controllers: [],
   providers: [],
