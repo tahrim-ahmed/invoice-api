@@ -7,7 +7,6 @@ echo -e '
 Choose the what you want: (Enter to run 1 and 2) \n
 1: ------------------------ restart nginx  ----------------------------- \n
 2: ---------------------- restart API server ----------------------------- \n
-3: ------------------------   run seeder    ------------------------------- \n
 3: --------------------------   pm2 logs  ---------------------------------
 '
 
@@ -54,10 +53,6 @@ case $num in
   pm2 logs distributor-api
   ;;
 3)
-  seeder
-  apiServer
-  ;;
-4)
   pm2 logs distributor-api
   ;;
 *)
