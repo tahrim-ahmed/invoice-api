@@ -14,6 +14,7 @@ import { InvoiceModule } from './api/invoice/invoice.module';
 import { PurchaseModule } from './api/purchase/purchase.module';
 import { StatementModule } from './api/statement/statement.module';
 import { StockModule } from './api/stock/stock.module';
+import { PurposeModule } from './api/purpose/purpose.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StockModule } from './api/stock/stock.module';
     ClientModule,
     InvoiceModule,
     PurchaseModule,
+    PurposeModule,
     StatementModule,
     StockModule,
   ],

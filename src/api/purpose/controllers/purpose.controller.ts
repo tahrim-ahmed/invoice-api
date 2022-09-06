@@ -17,21 +17,21 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { StatementService } from '../services/statement.service';
+import { PurposeService } from '../services/purpose.service';
 import { ResponseService } from '../../../package/services/response.service';
 import { RequestService } from '../../../package/services/request.service';
 import { IntValidationPipe } from '../../../package/pipes/int-validation.pipe';
 import { ResponseDto } from '../../../package/dto/response/response.dto';
 import { DtoValidationPipe } from '../../../package/pipes/dto-validation.pipe';
 import { UuidValidationPipe } from '../../../package/pipes/uuid-validation.pipe';
-import { StatementDto } from '../../../package/dto/statement/statement.dto';
+import { PurposeDto } from '../../../package/dto/purpose/purpose.dto';
 
-@ApiTags('Statement')
+@ApiTags('Purpose')
 @ApiBearerAuth()
-@Controller('statement')
-export class StatementController {
+@Controller('purpose')
+export class PurposeController {
   constructor(
-    private statementService: StatementService,
+    private purposeService: PurposeService,
     private readonly responseService: ResponseService,
     private readonly requestService: RequestService,
   ) {}
@@ -57,13 +57,13 @@ export class StatementController {
     @Query('limit', new IntValidationPipe()) limit: number,
     @Query('search') search: string,
   ): Promise<ResponseDto> {
-    const allStatements = this.statementService.search(page, limit, search);
+    const allPurpose = this.purposeService.search(page, limit, search);
     return this.responseService.toPaginationResponse(
       HttpStatus.OK,
       null,
       page,
       limit,
-      allStatements,
+      allPurpose,
     );
   }
 
@@ -100,7 +100,7 @@ export class StatementController {
     @Query('order') order: string,
     @Query('search') search: string,
   ): Promise<ResponseDto> {
-    const allStatement = this.statementService.pagination(
+    const allPurpose = this.purposeService.pagination(
       page,
       limit,
       sort,
@@ -112,14 +112,14 @@ export class StatementController {
       null,
       page,
       limit,
-      allStatement,
+      allPurpose,
     );
   }
 
   @ApiCreatedResponse({
-    description: 'Statement successfully added!!',
+    description: 'Purpose successfully added!!',
   })
-  @ApiBody({ type: StatementDto })
+  @ApiBody({ type: PurposeDto })
   @Post()
   create(
     @Body(
@@ -128,21 +128,21 @@ export class StatementController {
         forbidNonWhitelisted: true,
       }),
     )
-    statementDto: StatementDto,
+    createPurposeDto: PurposeDto,
   ): Promise<ResponseDto> {
-    const modifiedDto = this.requestService.forCreate(statementDto);
-    const statement = this.statementService.create(modifiedDto);
+    const modifiedDto = this.requestService.forCreate(createPurposeDto);
+    const purpose = this.purposeService.create(modifiedDto);
     return this.responseService.toDtoResponse(
       HttpStatus.CREATED,
-      'Statement successfully added!!',
-      statement,
+      'Purpose successfully added!!',
+      purpose,
     );
   }
 
   @ApiOkResponse({
-    description: 'Statement successfully updated!!',
+    description: 'Purpose successfully updated!!',
   })
-  @ApiBody({ type: StatementDto })
+  @ApiBody({ type: PurposeDto })
   @Put(':id')
   update(
     @Param('id', new UuidValidationPipe()) id: string,
@@ -153,33 +153,27 @@ export class StatementController {
         forbidNonWhitelisted: true,
       }),
     )
-    statementDto: StatementDto,
+    createPurposeDto: PurposeDto,
   ): Promise<ResponseDto> {
-    const modifiedDto = this.requestService.forUpdate(statementDto);
-    const statement = this.statementService.update(id, modifiedDto);
+    const modifiedDto = this.requestService.forUpdate(createPurposeDto);
+    const purpose = this.purposeService.update(id, modifiedDto);
     return this.responseService.toDtoResponse(
       HttpStatus.OK,
-      'Statement successfully updated!!',
-      statement,
+      'Purpose successfully updated!!',
+      purpose,
     );
   }
 
-  @ApiOkResponse({ description: 'Statement successfully deleted!' })
+  @ApiOkResponse({ description: 'Purpose successfully deleted!' })
   @Delete(':id')
   remove(
     @Param('id', new UuidValidationPipe()) id: string,
   ): Promise<ResponseDto> {
-    const deleted = this.statementService.remove(id);
+    const deleted = this.purposeService.remove(id);
     return this.responseService.toResponse(
       HttpStatus.OK,
-      'Statement successfully deleted!',
+      'Purpose successfully deleted!',
       deleted,
     );
-  }
-
-  @Get('statement-data')
-  statementData(): Promise<ResponseDto> {
-    const report = this.statementService.statementSummary();
-    return this.responseService.toResponse(HttpStatus.OK, null, report);
   }
 }

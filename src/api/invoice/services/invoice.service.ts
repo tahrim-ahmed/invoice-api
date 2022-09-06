@@ -201,14 +201,28 @@ export class InvoiceService {
       let statements = new StatementEntity();
 
       statements.referenceID = invoice.id;
-      invoice.paymentType === 'Cash'
-        ? (statements.purpose = 'Paid by Customer')
-        : (statements.purpose = 'Customer Payable');
-      statements.amount = Number(invoice.totalMRP);
+      if (invoice.paymentType === 'Cash') {
+        statements.purpose = 'Customer Payable';
+        statements.amount = Number(invoice.totalMRP);
 
-      statements = this.requestService.forCreate<StatementEntity>(statements);
+        statements = this.requestService.forCreate<StatementEntity>(statements);
 
-      await this.statementService.create(statements);
+        await this.statementService.create(statements);
+
+        statements.purpose = 'Paid by Customer';
+        statements.amount = Number(invoice.totalMRP);
+
+        statements = this.requestService.forCreate<StatementEntity>(statements);
+
+        await this.statementService.create(statements);
+      } else {
+        statements.purpose = 'Customer Payable';
+        statements.amount = Number(invoice.totalMRP);
+
+        statements = this.requestService.forCreate<StatementEntity>(statements);
+
+        await this.statementService.create(statements);
+      }
 
       return this.getInvoice(invoice.id);
     } catch (error) {

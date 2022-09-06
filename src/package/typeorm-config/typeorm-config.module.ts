@@ -12,6 +12,7 @@ import { PurchaseEntity } from '../entities/purchase/purchase.entity';
 import { PurchaseDetailsEntity } from '../entities/purchase/purchase-details.entity';
 import { StatementEntity } from '../entities/statement/statement.entity';
 import { StockEntity } from '../entities/stock/stock.entity';
+import { PurposeEntity } from '../entities/purpose/purpose.entity';
 
 @Global()
 @Module({
@@ -35,6 +36,7 @@ import { StockEntity } from '../entities/stock/stock.entity';
           InvoiceDetailsEntity,
           PurchaseEntity,
           PurchaseDetailsEntity,
+          PurposeEntity,
           StatementEntity,
           StockEntity,
         ],

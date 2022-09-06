@@ -7,12 +7,16 @@ import { SystemException } from '../../../package/exceptions/system.exception';
 import { DeleteDto } from '../../../package/dto/response/delete.dto';
 import { StatementEntity } from '../../../package/entities/statement/statement.entity';
 import { StatementDto } from '../../../package/dto/statement/statement.dto';
+import { PurposeDto } from '../../../package/dto/purpose/purpose.dto';
+import { PurposeEntity } from '../../../package/entities/purpose/purpose.entity';
 
 @Injectable()
 export class StatementService {
   constructor(
     @InjectRepository(StatementEntity)
     private readonly statementRepository: Repository<StatementEntity>,
+    @InjectRepository(PurposeEntity)
+    private readonly purposeRepository: Repository<PurposeEntity>,
     private readonly exceptionService: ExceptionService,
   ) {}
 
@@ -146,6 +150,30 @@ export class StatementService {
       throw new SystemException(error);
     }
   };
+
+  statementSummary = async () => {
+    const report: { amount: number; purpose: PurposeDto }[] = [];
+
+    const query = this.statementRepository
+      .createQueryBuilder('q')
+      .distinctOn(['q.purpose'])
+      .select('q.purpose')
+      .addSelect('SUM(q.amount)', 'amount')
+      .groupBy('q.purpose');
+
+    const data = await query.getRawMany();
+    const purposes = await this.getPurposes();
+
+    for (const purpose of purposes) {
+      const found = data.find((f) => f.q_purpose === purpose.name);
+      report.push({
+        amount: found ? Number(found.amount) : 0,
+        purpose,
+      });
+    }
+
+    return report;
+  };
   /********************** Start checking relations of post ********************/
 
   getStatement = async (id: string): Promise<StatementDto> => {
@@ -156,6 +184,15 @@ export class StatementService {
 
     this.exceptionService.notFound(statement, 'Statement Not Found!!');
     return plainToClass(StatementDto, statement);
+  };
+
+  getPurposes = async (): Promise<PurposeDto[]> => {
+    const purposes = await this.purposeRepository
+      .createQueryBuilder('q')
+      .select(['q.id', 'q.name'])
+      .getMany();
+
+    return plainToInstance<PurposeDto, PurposeEntity>(PurposeDto, purposes);
   };
 
   getStatementByReference = async (

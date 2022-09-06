@@ -153,14 +153,28 @@ export class PurchaseService {
       let statements = new StatementEntity();
 
       statements.referenceID = purchase.id;
-      purchase.type === 'Cash'
-        ? (statements.purpose = 'Purchased on Cash')
-        : (statements.purpose = 'BAYER Receivable');
-      statements.amount = Number(purchase.totalPrice);
+      if (purchase.type === 'Cash') {
+        statements.purpose = 'BAYER Receivable';
+        statements.amount = Number(purchase.totalPrice);
 
-      statements = this.requestService.forCreate<StatementEntity>(statements);
+        statements = this.requestService.forCreate<StatementEntity>(statements);
 
-      await this.statementService.create(statements);
+        await this.statementService.create(statements);
+
+        statements.purpose = 'Purchased on Cash';
+        statements.amount = Number(purchase.totalPrice);
+
+        statements = this.requestService.forCreate<StatementEntity>(statements);
+
+        await this.statementService.create(statements);
+      } else {
+        statements.purpose = 'BAYER Receivable';
+        statements.amount = Number(purchase.totalPrice);
+
+        statements = this.requestService.forCreate<StatementEntity>(statements);
+
+        await this.statementService.create(statements);
+      }
 
       return this.getPurchase(purchase.id);
     } catch (error) {
