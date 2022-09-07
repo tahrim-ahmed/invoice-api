@@ -217,4 +217,10 @@ export class InvoiceController {
     const invoices = this.invoiceService.findById(id);
     return this.responseService.toDtoResponse(HttpStatus.OK, null, invoices);
   }
+
+  @Get('chart')
+  chart(): Promise<ResponseDto> {
+    const report = this.invoiceService.chart();
+    return this.responseService.toResponse(HttpStatus.OK, null, report);
+  }
 }

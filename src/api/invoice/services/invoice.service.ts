@@ -390,6 +390,23 @@ export class InvoiceService {
     }
   };
 
+  chart = async () => {
+    try {
+      const query = this.invoiceRepository
+        .createQueryBuilder('q')
+        .addSelect('extract(year from q.order_date)', 'year')
+        .addSelect('extract(month from q.order_date)', 'month')
+        .addSelect('SUM(q.total_mrp)', 'total')
+        .groupBy('extract(year from q.order_date)')
+        .addGroupBy('extract(month from q.order_date)')
+        .orderBy('extract(year from q.order_date)', 'DESC');
+
+      return await query.getRawMany();
+    } catch (e) {
+      throw new SystemException(e);
+    }
+  };
+
   /********************** Start checking relations of post ********************/
   getInvoice = async (id: string): Promise<InvoiceDto> => {
     const invoice = await this.invoiceRepository
