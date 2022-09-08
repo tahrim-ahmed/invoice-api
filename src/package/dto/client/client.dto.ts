@@ -15,6 +15,11 @@ export class ClientDto extends BaseDto {
   name: string;
 
   @ApiProperty()
+  @IsString({ message: 'Must be a string' })
+  @MaxLength(255, { message: 'Maximum 255 characters supported' })
+  proprietor: string;
+
+  @ApiProperty()
   @IsEmail()
   @MaxLength(100, { message: 'Maximum 100 characters supported' })
   email: string;
@@ -35,4 +40,10 @@ export class ClientDto extends BaseDto {
   @IsString({ message: 'Must be a string' })
   @MaxLength(1000, { message: 'Maximum 1000 characters supported' })
   shipping: string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Must be non empty' })
+  @IsString({ message: 'Must be a string' })
+  @MaxLength(1000, { message: 'Maximum 1000 characters supported' })
+  production: string;
 }

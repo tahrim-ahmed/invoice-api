@@ -15,6 +15,9 @@ export class ClientEntity extends CustomBaseEntity {
   @Column({ type: 'varchar', name: 'name', length: 65 })
   name: string;
 
+  @Column({ type: 'varchar', name: 'proprietor', length: 65 })
+  proprietor: string;
+
   @Column({ type: 'varchar', name: 'email', length: 100 })
   email: string;
 
@@ -26,6 +29,9 @@ export class ClientEntity extends CustomBaseEntity {
 
   @Column({ type: 'text', name: 'shipping' })
   shipping: string;
+
+  @Column({ type: 'text', name: 'production' })
+  production: string;
 
   @OneToMany(() => InvoiceEntity, (invoiceEntity) => invoiceEntity.client)
   @JoinColumn({ name: 'client_id' })

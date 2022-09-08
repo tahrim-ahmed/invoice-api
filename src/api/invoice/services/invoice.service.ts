@@ -415,12 +415,16 @@ export class InvoiceService {
       .innerJoin('q.client', 'client')
       .addSelect([
         'client.name',
+        'client.proprietor',
         'client.code',
         'client.cell',
         'client.email',
         'client.billing',
         'client.shipping',
+        'client.production',
       ])
+      .leftJoinAndSelect('q.invoiceDetails', 'invoiceDetails')
+      .leftJoinAndSelect('invoiceDetails.product', 'product')
       .getOne();
     this.exceptionService.notFound(invoice, 'Invoice Not Found!!');
 
