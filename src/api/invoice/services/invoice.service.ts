@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
@@ -13,6 +13,10 @@ import { InvoiceDto } from '../../../package/dto/invoice/invoice.dto';
 import { SystemException } from '../../../package/exceptions/system.exception';
 import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
 import { InvoiceDetailsDto } from '../../../package/dto/invoice/invoice-details.dto';
+import { PartialPaymentDto } from '../../../package/dto/invoice/partial-payment.dto';
+import { StatementService } from '../../statement/services/statement.service';
+import { StatementEntity } from '../../../package/entities/statement/statement.entity';
+import { DeleteDto } from '../../../package/dto/response/delete.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -25,6 +29,7 @@ export class InvoiceService {
     private readonly productRepository: Repository<ProductEntity>,
     private readonly exceptionService: ExceptionService,
     private readonly clientService: ClientService,
+    private readonly statementService: StatementService,
     private readonly permissionService: PermissionService,
     private readonly requestService: RequestService,
   ) {}
@@ -97,7 +102,7 @@ export class InvoiceService {
         startDate = new Date(startDate).toISOString().slice(0, 10);
         endDate = new Date(endDate).toISOString().slice(0, 10);
 
-        query.andWhere('DATE(q.date)  between :startDate and :endDate', {
+        query.andWhere('DATE(q.orderDate)  between :startDate and :endDate', {
           startDate,
           endDate,
         });
@@ -118,7 +123,7 @@ export class InvoiceService {
 
       if (search) {
         query.andWhere(
-          '((q.invoiceID LIKE  :search) OR (q.client LIKE  :search))',
+          '((q.invoiceID LIKE  :search) OR (client.code LIKE  :search) OR (client.name LIKE  :search))',
           { search: `%${search}%` },
         );
       }
@@ -157,6 +162,23 @@ export class InvoiceService {
         invoiceDto.clientID,
       );
 
+      const date = new Date();
+      const year = date.getFullYear().toString();
+      const month = date.getMonth().toString();
+      const day = date.getDate().toString();
+      const hours = date.getHours().toString();
+      const minute = date.getMinutes().toString();
+
+      invoiceDto.invoiceID = year
+        .concat(month)
+        .concat(day)
+        .concat(hours)
+        .concat(minute);
+
+      invoiceDto.paymentType === 'Cash'
+        ? (invoiceDto.paidAmount = invoiceDto.totalMRP)
+        : (invoiceDto.paidAmount = 0);
+
       const invoice = this.invoiceRepository.create(invoiceDto);
       await this.invoiceRepository.save(invoice);
 
@@ -176,7 +198,111 @@ export class InvoiceService {
         await this.invoiceDetailsRepository.save(created);
       }
 
+      let statements = new StatementEntity();
+
+      statements.referenceID = invoice.id;
+      if (invoice.paymentType === 'Cash') {
+        statements.purpose = 'Customer Payable';
+        statements.amount = Number(invoice.totalMRP);
+
+        statements = this.requestService.forCreate<StatementEntity>(statements);
+
+        await this.statementService.create(statements);
+
+        statements.purpose = 'Paid by Customer';
+        statements.amount = Number(invoice.totalMRP);
+
+        statements = this.requestService.forCreate<StatementEntity>(statements);
+
+        await this.statementService.create(statements);
+      } else {
+        statements.purpose = 'Customer Payable';
+        statements.amount = Number(invoice.totalMRP);
+
+        statements = this.requestService.forCreate<StatementEntity>(statements);
+
+        await this.statementService.create(statements);
+      }
+
       return this.getInvoice(invoice.id);
+    } catch (error) {
+      throw new SystemException(error);
+    }
+  };
+
+  paid = async (id: string): Promise<boolean> => {
+    try {
+      const savedInvoice = await this.getInvoice(id);
+      if (savedInvoice.payment === 'Paid') {
+        throw new SystemException({
+          status: HttpStatus.FORBIDDEN,
+          message: 'Already paid',
+        });
+      }
+
+      let statements = new StatementEntity();
+
+      statements.referenceID = savedInvoice.id;
+      statements.purpose = 'Paid by Customer';
+      statements.amount = Number(
+        Number(Number(savedInvoice.totalMRP) - Number(savedInvoice.paidAmount)),
+      );
+
+      statements = this.requestService.forCreate<StatementEntity>(statements);
+
+      await this.statementService.create(statements);
+
+      savedInvoice.payment = 'Paid';
+      savedInvoice.creditPeriod = null;
+      savedInvoice.paidAmount = savedInvoice.totalMRP;
+
+      await this.invoiceRepository.save({
+        ...savedInvoice,
+      });
+
+      return Promise.resolve(true);
+    } catch (error) {
+      throw new SystemException(error);
+    }
+  };
+
+  partialPayment = async (
+    partialPaymentDto: PartialPaymentDto,
+  ): Promise<boolean> => {
+    try {
+      const savedInvoice = await this.getInvoice(partialPaymentDto.id);
+      if (savedInvoice.payment === 'Paid') {
+        throw new SystemException({
+          status: HttpStatus.FORBIDDEN,
+          message: 'Already paid',
+        });
+      }
+
+      if (
+        savedInvoice.totalMRP - savedInvoice.paidAmount ===
+        partialPaymentDto.amount
+      ) {
+        savedInvoice.payment = 'Paid';
+        savedInvoice.creditPeriod = null;
+      }
+
+      savedInvoice.paidAmount += partialPaymentDto.amount;
+
+      await this.invoiceRepository.save({
+        ...savedInvoice,
+      });
+
+      let statements = new StatementEntity();
+
+      statements.referenceID = savedInvoice.id;
+      statements.purpose = 'Paid by Customer';
+      statements.amount = Number(partialPaymentDto.amount);
+
+      statements = this.requestService.forCreate<StatementEntity>(statements);
+
+      await this.statementService.create(statements);
+
+      return Promise.resolve(true);
     } catch (error) {
       throw new SystemException(error);
     }
@@ -185,7 +311,7 @@ export class InvoiceService {
   /* update = async (
     id: string,
     invoiceDto: CreateInvoiceDto,
-  ): Promise<InvoiceDto> => {
+  ): Promise<PurchaseDto> => {
     try {
       const savedInvoice = await this.getInvoice(id);
 
@@ -197,14 +323,14 @@ export class InvoiceService {
 
       if (invoiceDto.createInvoiceDetailsDto.length) {
         let totalAmount = 0;
-        const invoiceDetails: InvoiceDetailsEntity[] = [];
+        const invoiceDetails: PurchaseDetailsEntity[] = [];
 
         for (const details of invoiceDto.createInvoiceDetailsDto) {
           const oldInvoiceDetail = await this.getInvoiceDetailByInvoiceID(id);
 
           await this.removeInvoiceDetails(id);
 
-          let invDetails = new InvoiceDetailsEntity();
+          let invDetails = new PurchaseDetailsEntity();
           invDetails.quantity = Number(details.quantity);
           invDetails.unitPrice = Number(details.unitPrice);
           invDetails.product = await this.getProduct(details.productID);
@@ -216,7 +342,7 @@ export class InvoiceService {
           invDetails.createAt = oldInvoiceDetail.createAt;
 
           invDetails =
-            this.requestService.forUpdate<InvoiceDetailsEntity>(invDetails);
+            this.requestService.forUpdate<PurchaseDetailsEntity>(invDetails);
 
           const created = this.invoiceDetailsRepository.create(invDetails);
           invoiceDetails.push(
@@ -225,7 +351,7 @@ export class InvoiceService {
         }
 
         invoiceDto.invoiceDetails = plainToInstance(
-          InvoiceDetailsDto,
+          PurchaseDetailsDto,
           invoiceDetails,
         );
         invoiceDto.totalAmount = totalAmount;
@@ -242,28 +368,42 @@ export class InvoiceService {
     }
   };*/
 
-  /*remove = async (id: string): Promise<DeleteDto> => {
+  remove = async (id: string): Promise<DeleteDto> => {
     try {
-      const savedInvoice = await this.getInvoice(id);
-
-      await this.softRemoveInvoiceDetails(id);
-
-      await this.invoiceRepository.save({
-        ...savedInvoice,
-        ...isInActive,
+      const deletedInvoice = await this.invoiceRepository.softDelete({
+        id,
       });
 
-      return Promise.resolve(new DeleteDto(true));
+      await this.statementService.removeByReference(id);
+
+      return Promise.resolve(new DeleteDto(!!deletedInvoice.affected));
     } catch (error) {
       throw new SystemException(error);
     }
-  };*/
+  };
 
   findById = async (id: string): Promise<InvoiceDto> => {
     try {
       return await this.getInvoice(id);
     } catch (error) {
       throw new SystemException(error);
+    }
+  };
+
+  chart = async () => {
+    try {
+      const query = this.invoiceRepository
+        .createQueryBuilder('q')
+        .addSelect('extract(year from q.order_date)', 'year')
+        .addSelect('extract(month from q.order_date)', 'month')
+        .addSelect('SUM(q.total_mrp)', 'total')
+        .groupBy('extract(year from q.order_date)')
+        .addGroupBy('extract(month from q.order_date)')
+        .orderBy('extract(year from q.order_date)', 'DESC');
+
+      return await query.getRawMany();
+    } catch (e) {
+      throw new SystemException(e);
     }
   };
 
@@ -275,12 +415,16 @@ export class InvoiceService {
       .innerJoin('q.client', 'client')
       .addSelect([
         'client.name',
+        'client.proprietor',
         'client.code',
         'client.cell',
         'client.email',
         'client.billing',
         'client.shipping',
+        'client.production',
       ])
+      .leftJoinAndSelect('q.invoiceDetails', 'invoiceDetails')
+      .leftJoinAndSelect('invoiceDetails.product', 'product')
       .getOne();
     this.exceptionService.notFound(invoice, 'Invoice Not Found!!');
 
@@ -305,10 +449,10 @@ export class InvoiceService {
   async removeInvoiceDetails(invoiceID: string): Promise<boolean> {
     return !!(await this.invoiceDetailsRepository
       .createQueryBuilder('q')
-      .where('q.invoice_id =:invID', {
+      .where('q.invoiceID =:invID', {
         invID: invoiceID,
       })
-      .delete());
+      .softDelete());
   }
 
   getProduct = async (id: string): Promise<ProductEntity> => {

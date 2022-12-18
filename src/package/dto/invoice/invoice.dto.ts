@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsDateString, IsDecimal, IsInt,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
-  IsNumberString,
   IsOptional,
   IsString,
   MaxLength,
@@ -14,6 +13,10 @@ import { InvoiceDetailsDto } from './invoice-details.dto';
 import { ClientDto } from '../client/client.dto';
 
 export class InvoiceDto extends BaseDto {
+  @ApiProperty()
+  @IsOptional()
+  invoiceID: string;
+
   @ApiProperty()
   @IsNotEmpty({ message: 'Date can not be empty' })
   @IsDateString({ strict: true })
@@ -29,6 +32,23 @@ export class InvoiceDto extends BaseDto {
   @IsString({ message: 'Platform must be a string' })
   @MaxLength(255, { message: 'Platform less than 255 characters' })
   platform: string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Payment can not be empty' })
+  @IsString({ message: 'Payment must be a string' })
+  @MaxLength(255, { message: 'Payment less than 255 characters' })
+  payment: string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Payment type can not be empty' })
+  @IsString({ message: 'Payment type must be a string' })
+  @MaxLength(255, { message: 'Payment type less than 255 characters' })
+  paymentType: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsDateString({ strict: true })
+  creditPeriod: Date | string;
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Total TP can not be empty' })
@@ -47,13 +67,18 @@ export class InvoiceDto extends BaseDto {
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Total Commission can not be empty' })
-  @IsNumber({}, { message: 'Total Commission must be a number'})
+  @IsNumber({}, { message: 'Total Commission must be a number' })
   totalProfit: number;
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Others can not be empty' })
   @IsNumber({}, { message: 'Others must be a number' })
   others: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber({}, { message: 'Others must be a number' })
+  paidAmount: number;
 
   @Type(() => ClientDto)
   client: ClientDto;

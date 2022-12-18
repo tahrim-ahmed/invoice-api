@@ -5,7 +5,6 @@ import {
   Get,
   HttpStatus,
   Param,
-  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -16,23 +15,22 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { InvoiceService } from '../services/invoice.service';
+import { PurchaseService } from '../services/purchase.service';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { ResponseService } from '../../../package/services/response.service';
 import { RequestService } from '../../../package/services/request.service';
 import { IntValidationPipe } from '../../../package/pipes/int-validation.pipe';
 import { ResponseDto } from '../../../package/dto/response/response.dto';
-import { CreateInvoiceDto } from '../../../package/dto/create/create-invoice.dto';
 import { DtoValidationPipe } from '../../../package/pipes/dto-validation.pipe';
 import { UuidValidationPipe } from '../../../package/pipes/uuid-validation.pipe';
-import { PartialPaymentDto } from '../../../package/dto/invoice/partial-payment.dto';
+import { CreatePurchaseDto } from '../../../package/dto/create/create-purchase.dto';
 
-@ApiTags('Invoice')
+@ApiTags('Purchase')
 @ApiBearerAuth()
-@Controller('invoice')
-export class InvoiceController {
+@Controller('purchase')
+export class PurchaseController {
   constructor(
-    private invoiceService: InvoiceService,
+    private purchaseService: PurchaseService,
     private readonly responseService: ResponseService,
     private readonly requestService: RequestService,
   ) {}
@@ -48,13 +46,13 @@ export class InvoiceController {
     @Query('limit', new IntValidationPipe()) limit: number,
     @Query('search') search: string,
   ): Promise<ResponseDto> {
-    const invoices = this.invoiceService.search(page, limit, search);
+    const purchases = this.purchaseService.search(page, limit, search);
     return this.responseService.toPaginationResponse(
       HttpStatus.OK,
       null,
       page,
       limit,
-      invoices,
+      purchases,
     );
   }
 
@@ -65,11 +63,6 @@ export class InvoiceController {
   })
   @ApiImplicitQuery({
     name: 'order',
-    required: false,
-    type: String,
-  })
-  @ApiImplicitQuery({
-    name: 'client',
     required: false,
     type: String,
   })
@@ -94,12 +87,11 @@ export class InvoiceController {
     @Query('limit', new IntValidationPipe()) limit: number,
     @Query('sort') sort: string,
     @Query('order') order: string,
-    @Query('client') client: string,
     @Query('search') search: string,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ): Promise<ResponseDto> {
-    const invoices = this.invoiceService.pagination(
+    const purchases = this.purchaseService.pagination(
       page,
       limit,
       sort,
@@ -113,14 +105,14 @@ export class InvoiceController {
       null,
       page,
       limit,
-      invoices,
+      purchases,
     );
   }
 
   @ApiCreatedResponse({
-    description: 'Invoice successfully added!!',
+    description: 'Purchase successfully added!!',
   })
-  @ApiBody({ type: CreateInvoiceDto })
+  @ApiBody({ type: CreatePurchaseDto })
   @Post()
   create(
     @Body(
@@ -129,46 +121,14 @@ export class InvoiceController {
         forbidNonWhitelisted: true,
       }),
     )
-    invoiceDto: CreateInvoiceDto,
+    purchaseDto: CreatePurchaseDto,
   ): Promise<ResponseDto> {
-    const modifiedDto = this.requestService.forCreate(invoiceDto);
-    const invoice = this.invoiceService.create(modifiedDto);
+    const modifiedDto = this.requestService.forCreate(purchaseDto);
+    const purchase = this.purchaseService.create(modifiedDto);
     return this.responseService.toDtoResponse(
       HttpStatus.CREATED,
-      'Invoice successfully added!!',
-      invoice,
-    );
-  }
-
-  @ApiOkResponse({ description: 'Invoice successfully marked as paid!' })
-  @Patch('paid/:id')
-  paid(
-    @Param('id', new UuidValidationPipe()) id: string,
-  ): Promise<ResponseDto> {
-    const paid = this.invoiceService.paid(id);
-    return this.responseService.toResponse(
-      HttpStatus.OK,
-      'Invoice successfully marked as paid!',
-      paid,
-    );
-  }
-
-  @ApiOkResponse({ description: 'Successfully submitted partial payment!' })
-  @Patch('partial-pay')
-  partialPayment(
-    @Body(
-      new DtoValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
-    )
-    partialPayment: PartialPaymentDto,
-  ): Promise<ResponseDto> {
-    const partialPay = this.invoiceService.partialPayment(partialPayment);
-    return this.responseService.toResponse(
-      HttpStatus.OK,
-      'Successfully submitted partial payment!',
-      partialPay,
+      'Purchase successfully added!!',
+      purchase,
     );
   }
 
@@ -197,15 +157,15 @@ export class InvoiceController {
     );
   }*/
 
-  @ApiOkResponse({ description: 'Invoice successfully deleted!' })
+  @ApiOkResponse({ description: 'Purchase successfully deleted!' })
   @Delete(':id')
   remove(
     @Param('id', new UuidValidationPipe()) id: string,
   ): Promise<ResponseDto> {
-    const deleted = this.invoiceService.remove(id);
+    const deleted = this.purchaseService.remove(id);
     return this.responseService.toResponse(
       HttpStatus.OK,
-      'Invoice successfully deleted!',
+      'Purchase successfully deleted!',
       deleted,
     );
   }
@@ -214,13 +174,7 @@ export class InvoiceController {
   findById(
     @Param('id', new UuidValidationPipe()) id: string,
   ): Promise<ResponseDto> {
-    const invoices = this.invoiceService.findById(id);
-    return this.responseService.toDtoResponse(HttpStatus.OK, null, invoices);
-  }
-
-  @Get('chart')
-  chart(): Promise<ResponseDto> {
-    const report = this.invoiceService.chart();
-    return this.responseService.toResponse(HttpStatus.OK, null, report);
+    const purchases = this.purchaseService.findById(id);
+    return this.responseService.toDtoResponse(HttpStatus.OK, null, purchases);
   }
 }

@@ -8,6 +8,11 @@ import { ProductEntity } from '../entities/product/product.entity';
 import { ClientEntity } from '../entities/client/client.entity';
 import { InvoiceEntity } from '../entities/invoice/invoice.entity';
 import { InvoiceDetailsEntity } from '../entities/invoice/invoice-details.entity';
+import { PurchaseEntity } from '../entities/purchase/purchase.entity';
+import { PurchaseDetailsEntity } from '../entities/purchase/purchase-details.entity';
+import { StatementEntity } from '../entities/statement/statement.entity';
+import { StockEntity } from '../entities/stock/stock.entity';
+import { PurposeEntity } from '../entities/purpose/purpose.entity';
 
 @Global()
 @Module({
@@ -29,6 +34,11 @@ import { InvoiceDetailsEntity } from '../entities/invoice/invoice-details.entity
           ClientEntity,
           InvoiceEntity,
           InvoiceDetailsEntity,
+          PurchaseEntity,
+          PurchaseDetailsEntity,
+          PurposeEntity,
+          StatementEntity,
+          StockEntity,
         ],
         synchronize: <boolean>(
           (configService.get<number>('DATABASE_SYNCRONIZE') == 1)
